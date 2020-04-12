@@ -181,17 +181,23 @@ def get_product_by_filter(database, filter):
   product = query_db(database, Product, filter)
   if len(product) == 0:
     return None
-  return product[0]
+  return product
 
 def get_product_by_id(database, id):
   """Returns a Product object of a given ID or None if the product is not found.
   """
-  return get_product_by_filter(database, (Product.id==id))
+  product = get_product_by_filter(database, (Product.id==id))
+  if len(product) == 1:
+    return product[0]
+  return None
 
 def get_product_by_name(database, name):
   """Returns a Product object of a given name or None if the product is not found.
   """
-  return get_product_by_filter(database, (Product.name==name))
+  product = get_product_by_filter(database, (Product.name==name))
+  if len(product) == 1:
+    return product[0]
+  return None
 
 def get_products_by_manufacturer(database, manufacturer):
   """Returns a Product object of a given name or None if the product is not found.
