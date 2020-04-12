@@ -72,7 +72,7 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     """
     products = get_products_by_manufacturer(self.database, request.manufacturer)
     error = ''
-    if len(products) == 0:
+    if products is None:
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details('No products were found for the manufacturer ' + request.manufacturer)
     return [self.to_inventory_system_product(product) for product in products]
