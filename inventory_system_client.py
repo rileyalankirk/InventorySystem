@@ -31,12 +31,11 @@ def main():
             # Run the command that is passed as an argument to the program
             if args.command == 'get-products-in-stock':
                 products = stub.GetProductsInStock(inventory_system.Empty())
-                message = ''
-                for product in products: message += str(product) + '\n'
-                if message == '':
-                    print('There are no products in stock.')
+                if len(products.products) > 0:
+                    for product in products.products:
+                        print(product)
                 else:
-                    print(message)
+                    print('There are no products in stock.')
             elif args.command == 'get-product-by-id':
                 product = stub.GetProductByID(inventory_system.ID(id=args.id))
                 print(product)
@@ -45,13 +44,13 @@ def main():
                 print(product)
             elif args.command == 'get-products-by-manufacturer':
                 products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer=args.manufacturer))
-                for product in products: print(product)
+                for product in products.products: print(product)
             elif args.command == 'get-order':
                 order = stub.GetOrder(inventory_system.ID(id=args.id))
                 print(order)
             elif args.command == 'get-orders':
                 orders = stub.GetOrders(inventory_system.OrderStatus(paid=args.paid, shipped=args.shipped))
-                for order in orders: print(order)
+                for order in orders.orders: print(order)
             elif args.command == 'add-product':
                 product_id = stub.AddProduct(inventory_system.Product(name=args.name, description=args.description,
                                             manufacturer=args.manufacturer, wholesale_cost=args.wholesale_cost,

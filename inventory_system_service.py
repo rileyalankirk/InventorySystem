@@ -125,7 +125,7 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details('No orders were found satisfying is_paid=' + str(request.paid) +
                           ' and/or is_shipped=' + str(request.shipped))
-    return inventory_system.Products(products=[self.to_inventory_system_order(order) for order in orders])
+    return inventory_system.Orders(products=[self.to_inventory_system_order(order) for order in orders])
   
   def ClearDatabase(self, request, context):
     """Clears inventory system database
