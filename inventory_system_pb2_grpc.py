@@ -16,25 +16,25 @@ class InventorySystemStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.GetProductByID = channel.unary_unary(
-        '/InventorySystem/GetProductByID',
-        request_serializer=inventory__system__pb2.ID.SerializeToString,
-        response_deserializer=inventory__system__pb2.Product.FromString,
+    self.GetProductsByID = channel.unary_unary(
+        '/InventorySystem/GetProductsByID',
+        request_serializer=inventory__system__pb2.IDs.SerializeToString,
+        response_deserializer=inventory__system__pb2.Products.FromString,
         )
-    self.GetProductByName = channel.unary_unary(
-        '/InventorySystem/GetProductByName',
-        request_serializer=inventory__system__pb2.Name.SerializeToString,
-        response_deserializer=inventory__system__pb2.Product.FromString,
+    self.GetProductsByName = channel.unary_unary(
+        '/InventorySystem/GetProductsByName',
+        request_serializer=inventory__system__pb2.Names.SerializeToString,
+        response_deserializer=inventory__system__pb2.Products.FromString,
         )
     self.GetProductsByManufacturer = channel.unary_unary(
         '/InventorySystem/GetProductsByManufacturer',
         request_serializer=inventory__system__pb2.Manufacturer.SerializeToString,
         response_deserializer=inventory__system__pb2.Products.FromString,
         )
-    self.AddProduct = channel.unary_unary(
-        '/InventorySystem/AddProduct',
-        request_serializer=inventory__system__pb2.Product.SerializeToString,
-        response_deserializer=inventory__system__pb2.ID.FromString,
+    self.AddProducts = channel.unary_unary(
+        '/InventorySystem/AddProducts',
+        request_serializer=inventory__system__pb2.Products.SerializeToString,
+        response_deserializer=inventory__system__pb2.IDs.FromString,
         )
     self.UpdateProduct = channel.unary_unary(
         '/InventorySystem/UpdateProduct',
@@ -79,15 +79,15 @@ class InventorySystemServicer(object):
   Note: Future TODOs are the planned updates for the inventory system to make it more general and more feature-rich
   """
 
-  def GetProductByID(self, request, context):
-    """Gets a product by its ID 
+  def GetProductsByID(self, request, context):
+    """Gets products by their IDs 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetProductByName(self, request, context):
-    """Gets a product by its name 
+  def GetProductsByName(self, request, context):
+    """Gets products by their names 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -100,10 +100,10 @@ class InventorySystemServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def AddProduct(self, request, context):
-    """Adds a new product that does not have the same name as previous products and the ID is
-    assigned by the server; returns the ID of the product if it was added successfully
-    otherwise empty string 
+  def AddProducts(self, request, context):
+    """Adds new products that do not have the same names as previous products and the IDs are
+    assigned by the server; returns the IDs of the products if they were added successfully
+    otherwise empty list of IDs 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -168,25 +168,25 @@ class InventorySystemServicer(object):
 
 def add_InventorySystemServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'GetProductByID': grpc.unary_unary_rpc_method_handler(
-          servicer.GetProductByID,
-          request_deserializer=inventory__system__pb2.ID.FromString,
-          response_serializer=inventory__system__pb2.Product.SerializeToString,
+      'GetProductsByID': grpc.unary_unary_rpc_method_handler(
+          servicer.GetProductsByID,
+          request_deserializer=inventory__system__pb2.IDs.FromString,
+          response_serializer=inventory__system__pb2.Products.SerializeToString,
       ),
-      'GetProductByName': grpc.unary_unary_rpc_method_handler(
-          servicer.GetProductByName,
-          request_deserializer=inventory__system__pb2.Name.FromString,
-          response_serializer=inventory__system__pb2.Product.SerializeToString,
+      'GetProductsByName': grpc.unary_unary_rpc_method_handler(
+          servicer.GetProductsByName,
+          request_deserializer=inventory__system__pb2.Names.FromString,
+          response_serializer=inventory__system__pb2.Products.SerializeToString,
       ),
       'GetProductsByManufacturer': grpc.unary_unary_rpc_method_handler(
           servicer.GetProductsByManufacturer,
           request_deserializer=inventory__system__pb2.Manufacturer.FromString,
           response_serializer=inventory__system__pb2.Products.SerializeToString,
       ),
-      'AddProduct': grpc.unary_unary_rpc_method_handler(
-          servicer.AddProduct,
-          request_deserializer=inventory__system__pb2.Product.FromString,
-          response_serializer=inventory__system__pb2.ID.SerializeToString,
+      'AddProducts': grpc.unary_unary_rpc_method_handler(
+          servicer.AddProducts,
+          request_deserializer=inventory__system__pb2.Products.FromString,
+          response_serializer=inventory__system__pb2.IDs.SerializeToString,
       ),
       'UpdateProduct': grpc.unary_unary_rpc_method_handler(
           servicer.UpdateProduct,

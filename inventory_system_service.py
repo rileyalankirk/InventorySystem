@@ -14,8 +14,8 @@ import os
 import sys
 import uuid
 from concurrent import futures
-from inventory_system import create_inventory_system_db, get_dbsession, reset_db, get_product_by_id, get_product_by_name,\
-                             get_products_by_manufacturer, add_product, update_product, get_products_in_stock,\
+from inventory_system import create_inventory_system_db, get_dbsession, reset_db, get_products_by_id, get_products_by_name,\
+                             get_products_by_manufacturer, add_products, update_product, get_products_in_stock,\
                              get_order, create_order, get_orders, update_order
 from os import path
 
@@ -49,40 +49,39 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
       return inventory_system.Product()
     return self.to_inventory_system_product(product)
 
-  def GetProductByID(self, request, context):
-    """Gets a product by its ID 
+  def GetProductsByID(self, request, context):
+    """Gets products by their IDs
     """
-    product = get_product_by_id(self.database, request.id)
-    error = ''
-    if product is None:
-      error = 'No product was found for the id ' + request.id
-    return self.__get_product_by(context, product, error)
+    products = get_products_by_id(self.database, request.ids)
+    if products is None:
+      context.set_code(grpc.StatusCode.NOT_FOUND)
+      context.set_details('No products were found for the given IDs ' + str(request.ids))
+    return inventory_system.Products(products=[self.to_inventory_system_product(product) for product in products])
 
-  def GetProductByName(self, request, context):
+  def GetProductsByName(self, request, context):
     """Gets a product by its name 
     """
-    product = get_product_by_name(self.database, request.name)
-    error = ''
-    if product is None:
-      error = 'No product was found for the name ' + request.name
-    return self.__get_product_by(context, product, error)
+    products = get_products_by_name(self.database, request.names)
+    if products is None:
+      context.set_code(grpc.StatusCode.NOT_FOUND)
+      context.set_details('No products were found for the given names ' + str(request.names))
+    return inventory_system.Products(products=[self.to_inventory_system_product(product) for product in products])
 
   def GetProductsByManufacturer(self, request, context):
     """Retrieves all products from a given manufacturer 
     """
     products = get_products_by_manufacturer(self.database, request.manufacturer)
-    error = ''
     if products is None:
       context.set_code(grpc.StatusCode.NOT_FOUND)
-      context.set_details('No products were found for the manufacturer ' + request.manufacturer)
+      context.set_details('No products were found for the manufacturer ' + str(request.manufacturer))
     return inventory_system.Products(products=[self.to_inventory_system_product(product) for product in products])
 
-  def AddProduct(self, request, context):
-    """Adds a new product that does not have the same name as previous products and the ID is
-    assigned by the server; returns the ID of the product if it was added successfully
-    otherwise empty string 
+  def AddProducts(self, request, context):
+    """Adds new products that do not have the same names as previous products and the IDs are
+    assigned by the server; returns the IDs of the products if they were added successfully
+    otherwise empty list 
     """
-    return inventory_system.ID(id=add_product(self.database, request))
+    return inventory_system.IDs(ids=add_products(self.database, request.products))
 
   def UpdateProduct(self, request, context):
     """Update products (name and ID cannot be updated)

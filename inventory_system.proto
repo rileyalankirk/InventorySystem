@@ -7,27 +7,21 @@ syntax = "proto3";
 /* A service that allows you to keep track of an inventory of products and the orders for those products */
 // Note: Future TODOs are the planned updates for the inventory system to make it more general and more feature-rich
 service InventorySystem {
-    /* Gets a product by its ID */
-    rpc GetProductByID (ID) returns (Product) {}
-    // Future TODO: replace with GetProductsByID
-    // rpc GetProductsByID (IDs) returns (Products) {}
+    /* Gets products by their IDs */
+    rpc GetProductsByID (IDs) returns (Products) {}
 
-    /* Gets a product by its name */
-    rpc GetProductByName (Name) returns (Product) {}
-    // Future TODO: replace with GetProductsByName
-    // rpc GetProductsByName (Names) returns (Products) {}
+    /* Gets products by their names */
+    rpc GetProductsByName (Names) returns (Products) {}
 
     /* Retrieves all products from a given manufacturer */
     rpc GetProductsByManufacturer (Manufacturer) returns (Products) {}
     // Future TODO: replace with GetProductsByManufacturers
     // rpc GetProductsByManufacturers (Manufacturers) returns (Products) {}
-
-    /* Adds a new product that does not have the same name as previous products and the ID is
-       assigned by the server; returns the ID of the product if it was added successfully
-       otherwise empty string */
-    rpc AddProduct (Product) returns (ID) {}
-    // Future TODO: replace with AddProducts
-    // rpc AddProducts (Products) returns (IDs) {}
+    
+    /* Adds new products that do not have the same names as previous products and the IDs are
+       assigned by the server; returns the IDs of the products if they were added successfully
+       otherwise empty list of IDs */
+    rpc AddProducts (Products) returns (IDs) {}
 
     /* Update products (name and ID cannot be updated) */
     rpc UpdateProduct (Product) returns (Empty) {}

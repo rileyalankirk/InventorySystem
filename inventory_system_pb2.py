@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x16inventory_system.proto\"\x07\n\x05\x45mpty\"\x10\n\x02ID\x12\n\n\x02id\x18\x01 \x01(\t\"\x14\n\x04Name\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x0cManufacturer\x12\x14\n\x0cmanufacturer\x18\x01 \x01(\t\"\x12\n\x03IDs\x12\x0b\n\x03ids\x18\x01 \x03(\t\"\x16\n\x05Names\x12\r\n\x05names\x18\x01 \x03(\t\"&\n\rManufacturers\x12\x15\n\rmanufacturers\x18\x01 \x03(\t\"\x89\x01\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x14\n\x0cmanufacturer\x18\x04 \x01(\t\x12\x16\n\x0ewholesale_cost\x18\x05 \x01(\x01\x12\x11\n\tsale_cost\x18\x06 \x01(\x01\x12\x0e\n\x06\x61mount\x18\x07 \x01(\x03\"&\n\x08Products\x12\x1a\n\x08products\x18\x01 \x03(\x0b\x32\x08.Product\",\n\x0bOrderStatus\x12\x0c\n\x04paid\x18\x01 \x01(\x08\x12\x0f\n\x07shipped\x18\x02 \x01(\x08\"0\n\x04\x44\x61te\x12\x0c\n\x04year\x18\x01 \x01(\x05\x12\r\n\x05month\x18\x02 \x01(\x05\x12\x0b\n\x03\x64\x61y\x18\x03 \x01(\x05\"~\n\x05Order\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\t\x12\x13\n\x04\x64\x61te\x18\x03 \x01(\x0b\x32\x05.Date\x12\x1a\n\x08products\x18\x04 \x03(\x0b\x32\x08.Product\x12\x0f\n\x07is_paid\x18\x05 \x01(\x08\x12\x12\n\nis_shipped\x18\x06 \x01(\x08\" \n\x06Orders\x12\x16\n\x06orders\x18\x01 \x03(\x0b\x32\x06.Order2\xa6\x03\n\x0fInventorySystem\x12!\n\x0eGetProductByID\x12\x03.ID\x1a\x08.Product\"\x00\x12%\n\x10GetProductByName\x12\x05.Name\x1a\x08.Product\"\x00\x12\x37\n\x19GetProductsByManufacturer\x12\r.Manufacturer\x1a\t.Products\"\x00\x12\x1d\n\nAddProduct\x12\x08.Product\x1a\x03.ID\"\x00\x12#\n\rUpdateProduct\x12\x08.Product\x1a\x06.Empty\"\x00\x12)\n\x12GetProductsInStock\x12\x06.Empty\x1a\t.Products\"\x00\x12\x19\n\x08GetOrder\x12\x03.ID\x1a\x06.Order\"\x00\x12\x1c\n\x0b\x43reateOrder\x12\x06.Order\x1a\x03.ID\"\x00\x12\x1f\n\x0bUpdateOrder\x12\x06.Order\x1a\x06.Empty\"\x00\x12$\n\tGetOrders\x12\x0c.OrderStatus\x1a\x07.Orders\"\x00\x12!\n\rClearDatabase\x12\x06.Empty\x1a\x06.Empty\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x16inventory_system.proto\"\x07\n\x05\x45mpty\"\x10\n\x02ID\x12\n\n\x02id\x18\x01 \x01(\t\"\x14\n\x04Name\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x0cManufacturer\x12\x14\n\x0cmanufacturer\x18\x01 \x01(\t\"\x12\n\x03IDs\x12\x0b\n\x03ids\x18\x01 \x03(\t\"\x16\n\x05Names\x12\r\n\x05names\x18\x01 \x03(\t\"&\n\rManufacturers\x12\x15\n\rmanufacturers\x18\x01 \x03(\t\"\x89\x01\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x14\n\x0cmanufacturer\x18\x04 \x01(\t\x12\x16\n\x0ewholesale_cost\x18\x05 \x01(\x01\x12\x11\n\tsale_cost\x18\x06 \x01(\x01\x12\x0e\n\x06\x61mount\x18\x07 \x01(\x03\"&\n\x08Products\x12\x1a\n\x08products\x18\x01 \x03(\x0b\x32\x08.Product\",\n\x0bOrderStatus\x12\x0c\n\x04paid\x18\x01 \x01(\x08\x12\x0f\n\x07shipped\x18\x02 \x01(\x08\"0\n\x04\x44\x61te\x12\x0c\n\x04year\x18\x01 \x01(\x05\x12\r\n\x05month\x18\x02 \x01(\x05\x12\x0b\n\x03\x64\x61y\x18\x03 \x01(\x05\"~\n\x05Order\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\t\x12\x13\n\x04\x64\x61te\x18\x03 \x01(\x0b\x32\x05.Date\x12\x1a\n\x08products\x18\x04 \x03(\x0b\x32\x08.Product\x12\x0f\n\x07is_paid\x18\x05 \x01(\x08\x12\x12\n\nis_shipped\x18\x06 \x01(\x08\" \n\x06Orders\x12\x16\n\x06orders\x18\x01 \x03(\x0b\x32\x06.Order2\xaf\x03\n\x0fInventorySystem\x12$\n\x0fGetProductsByID\x12\x04.IDs\x1a\t.Products\"\x00\x12(\n\x11GetProductsByName\x12\x06.Names\x1a\t.Products\"\x00\x12\x37\n\x19GetProductsByManufacturer\x12\r.Manufacturer\x1a\t.Products\"\x00\x12 \n\x0b\x41\x64\x64Products\x12\t.Products\x1a\x04.IDs\"\x00\x12#\n\rUpdateProduct\x12\x08.Product\x1a\x06.Empty\"\x00\x12)\n\x12GetProductsInStock\x12\x06.Empty\x1a\t.Products\"\x00\x12\x19\n\x08GetOrder\x12\x03.ID\x1a\x06.Order\"\x00\x12\x1c\n\x0b\x43reateOrder\x12\x06.Order\x1a\x03.ID\"\x00\x12\x1f\n\x0bUpdateOrder\x12\x06.Order\x1a\x06.Empty\"\x00\x12$\n\tGetOrders\x12\x0c.OrderStatus\x1a\x07.Orders\"\x00\x12!\n\rClearDatabase\x12\x06.Empty\x1a\x06.Empty\"\x00\x62\x06proto3'
 )
 
 
@@ -636,24 +636,24 @@ _INVENTORYSYSTEM = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   serialized_start=636,
-  serialized_end=1058,
+  serialized_end=1067,
   methods=[
   _descriptor.MethodDescriptor(
-    name='GetProductByID',
-    full_name='InventorySystem.GetProductByID',
+    name='GetProductsByID',
+    full_name='InventorySystem.GetProductsByID',
     index=0,
     containing_service=None,
-    input_type=_ID,
-    output_type=_PRODUCT,
+    input_type=_IDS,
+    output_type=_PRODUCTS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='GetProductByName',
-    full_name='InventorySystem.GetProductByName',
+    name='GetProductsByName',
+    full_name='InventorySystem.GetProductsByName',
     index=1,
     containing_service=None,
-    input_type=_NAME,
-    output_type=_PRODUCT,
+    input_type=_NAMES,
+    output_type=_PRODUCTS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
@@ -666,12 +666,12 @@ _INVENTORYSYSTEM = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='AddProduct',
-    full_name='InventorySystem.AddProduct',
+    name='AddProducts',
+    full_name='InventorySystem.AddProducts',
     index=3,
     containing_service=None,
-    input_type=_PRODUCT,
-    output_type=_ID,
+    input_type=_PRODUCTS,
+    output_type=_IDS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(

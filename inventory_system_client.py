@@ -9,8 +9,18 @@ import grpc
 import sys
 import inventory_system_pb2 as inventory_system
 import inventory_system_pb2_grpc as inventory_system_grpc
-from inventory_system import add_parsers_and_subparsers, get_date_and_products, products_from_arg_list, string_to_date
+from inventory_system import add_parsers_and_subparsers, get_date_and_products, products_from_arg_list,\
+                             string_to_date, get_products_to_add
 
+def to_inventory_system_products(products):
+    """Converts a list of products to a list of inventory_system.Product objects.
+    """
+    _products = []
+    for product in products:
+        _products.append(inventory_system.Product(id=product.id, name=product.name, description=product.description,
+                                                  manufacturer=product.manufacturer, wholesale_cost=product.wholesale_cost,
+                                                  sale_cost=product.sale_cost, amount=product.amount))
+    return _products
 
 def main():
     # Create an argument parser with a required ip argument and subparsers for each function that
@@ -36,12 +46,20 @@ def main():
                         print(product)
                 else:
                     print('There are no products in stock.')
-            elif args.command == 'get-product-by-id':
-                product = stub.GetProductByID(inventory_system.ID(id=args.id))
-                print(product)
-            elif args.command == 'get-product-by-name':
-                product = stub.GetProductByName(inventory_system.Name(name=args.name))
-                print(product)
+            elif args.command == 'get-products-by-id':
+                products = stub.GetProductsByID(inventory_system.IDs(ids=args.ids))
+                if len(products.products) > 0:
+                    for product in products.products:
+                        print(product)
+                else:
+                    print('There are no products of the given IDs.')
+            elif args.command == 'get-products-by-name':
+                products = stub.GetProductsByName(inventory_system.Names(names=args.names))
+                if len(products.products) > 0:
+                    for product in products.products:
+                        print(product)
+                else:
+                    print('There are no products of the given names.')
             elif args.command == 'get-products-by-manufacturer':
                 products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer=args.manufacturer))
                 for product in products.products: print(product)
@@ -51,12 +69,13 @@ def main():
             elif args.command == 'get-orders':
                 orders = stub.GetOrders(inventory_system.OrderStatus(paid=args.paid, shipped=args.shipped))
                 for order in orders.orders: print(order)
-            elif args.command == 'add-product':
-                product_id = stub.AddProduct(inventory_system.Product(name=args.name, description=args.description,
-                                            manufacturer=args.manufacturer, wholesale_cost=args.wholesale_cost,
-                                            sale_cost=args.sale_cost, amount=args.amount))
-                if product_id.id != '':
-                    print('Product ID:', product_id.id)
+            elif args.command == 'add-products':
+                products = to_inventory_system_products(get_products_to_add(args.products))
+                ids = stub.AddProducts(inventory_system.Products(products=products))
+                if len(ids.ids) > 0:
+                    print('Product IDs:')
+                    for id in ids.ids:
+                        print(id)
                 else:
                     print('Product creation was not successful. It may already exist. Try the get-product-by-* commands.')
             elif args.command == 'update-product':

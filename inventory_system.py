@@ -57,8 +57,8 @@ def query_db(database, query, filter=None):
     return query.all()
   return query.filter(filter).all()
 
-def add_db(database, row):
-  database.add(row)
+def add_db(database, values):
+  database.add_all(values)
   database.flush()
 
 def update_db(database, query, values, filter=None):
@@ -175,7 +175,7 @@ def get_order_products(database, id):
       return {product.id: product.amount for product in order[0].products}
     return {}
 
-def get_product_by_filter(database, filter):
+def get_products_by_filter(database, filter):
   """Returns a Product object based on a filter or None if the product is not found.
   """
   product = query_db(database, Product, filter)
@@ -183,46 +183,41 @@ def get_product_by_filter(database, filter):
     return None
   return product
 
-def get_product_by_id(database, id):
+def get_products_by_id(database, ids):
   """Returns a Product object of a given ID or None if the product is not found.
   """
-  product = get_product_by_filter(database, (Product.id==id))
-  if len(product) == 1:
-    return product[0]
-  return None
+  return get_products_by_filter(database, (Product.id.in_(ids)))
 
-def get_product_by_name(database, name):
+def get_products_by_name(database, names):
   """Returns a Product object of a given name or None if the product is not found.
   """
-  product = get_product_by_filter(database, (Product.name==name))
-  if len(product) == 1:
-    return product[0]
-  return None
+  return get_products_by_filter(database, (Product.name.in_(names)))
 
 def get_products_by_manufacturer(database, manufacturer):
   """Returns a Product object of a given name or None if the product is not found.
   """
-  return get_product_by_filter(database, (Product.manufacturer==manufacturer))
+  return get_products_by_filter(database, (Product.manufacturer==manufacturer))
 
-def add_product(database, product):
-  """Adds a product to the database and returns its ID or an empty string if the add fails.
+def add_products(database, products):
+  """Adds products to the database and returns their IDs or an empty list if the add fails.
   """
   try:
-    id = str(uuid.uuid4())
-    # Check that no other product has the same name
-    if len(query_db(database, Product, Product.name==product.name)) == 0:
-      add_db(database, Product(id=id, name=product.name, description=product.description,
-              manufacturer=product.manufacturer, wholesale_cost=product.wholesale_cost,
-              sale_cost=product.sale_cost, amount=product.amount))
-      save_db(database)
-      return id
-    return ''
+    ids = [str(uuid.uuid4()) for i in range(len(products))]
+    products = [Product(id=ids[i], name=products[i].name, description=products[i].description,
+                        manufacturer=products[i].manufacturer, wholesale_cost=products[i].wholesale_cost,
+                        sale_cost=products[i].sale_cost, amount=products[i].amount) for i in range(len(products))]
+    add_db(database, products)
+    save_db(database)
+    return ids
   except KeyboardInterrupt:
     # Save the database if there is a KeyboardInterrupt
     save_db(database)
     database.close()
     # Allow the interrupt to propagate up 
     raise KeyboardInterrupt
+  except Exception as e:
+    print('There was an issue adding products: ' + e)
+    return []
 
 def update_product(database, product):
   """Updates a product based on the passed product.
@@ -282,8 +277,8 @@ def create_order(database, order):
     if len(products) > 0:
       # Update how much product is available
       add_products_to_order(database, products)
-      add_db(database, Order(id=id, destination=order.destination, date=date, products=products,
-              is_paid=order.is_paid, is_shipped=order.is_shipped))
+      add_db(database, [Order(id=id, destination=order.destination, date=date, products=products,
+              is_paid=order.is_paid, is_shipped=order.is_shipped)])
       save_db(database)
       return id
     return ''
@@ -376,13 +371,13 @@ def add_parsers_and_subparsers(parser):
   subparsers.add_parser('get-products-in-stock', help='get-products-in-stock help')
 
 
-  # Create a parser for GetProductByID, GetProductByName, GetProductsByManufacturer, and GetOrder
+  # Create a parser for GetProductsByID, GetProductsByName, GetProductsByManufacturer, and GetOrder
   # which each have a single argument
-  getProdByIDParse = subparsers.add_parser('get-product-by-id', help='get-product-by-id help')
-  getProdByIDParse.add_argument('id', help='The ID of the product being retrieved')
+  getProdByIDParse = subparsers.add_parser('get-products-by-id', help='get-products-by-id help')
+  getProdByIDParse.add_argument('ids', nargs='+', help='The IDs of the products being retrieved')
 
-  getProdByNameParse = subparsers.add_parser('get-product-by-name', help='get-product-by-name help')
-  getProdByNameParse.add_argument('name', help='The name of the product being retrieved')
+  getProdByNameParse = subparsers.add_parser('get-products-by-name', help='get-products-by-name help')
+  getProdByNameParse.add_argument('names', nargs='+', help='The names of the products being retrieved')
 
   getProdsByManParse = subparsers.add_parser('get-products-by-manufacturer', help='get-products-by-manufacturer help')
   getProdsByManParse.add_argument('manufacturer', help='The manufacturer of the products being retrieved')
@@ -399,19 +394,11 @@ def add_parsers_and_subparsers(parser):
                                                                   'empty string for false and any other string for true')
 
 
-  # Create a parser for AddProduct and UpdateProduct which each have arguments for a product
-  addProductParse = subparsers.add_parser('add-product', help='add-product help')
-  addProductParse.add_argument('name', help='The name of the product being added')
-  addProductParse.add_argument('-d', '--description', default='',
-                                help='The description of the product being added')
-  addProductParse.add_argument('-m', '--manufacturer', default='',
-                                help='The manufacturer of the product being added')
-  addProductParse.add_argument('-w', '--wholesale_cost', default=0.0, type=float,
-                                help='The wholesale cost of the product being added')
-  addProductParse.add_argument('-s', '--sale_cost', default = 0.0, type=float,
-                                help='The sale cost of the product being added')
-  addProductParse.add_argument('-a', '--amount', default=0, type=int,
-                                help='The amount available of the product being added')
+  # Create a parser for AddProducts and UpdateProduct which each have arguments for a product
+  addProductParse = subparsers.add_parser('add-products', help='add-products help')
+  addProductParse.add_argument('products', nargs='+', help='The products being added (name,description,manufacturer,'
+                                                          'wholesale_cost,sale_cost,amount); only name is required')
+
 
   updateProductParse = subparsers.add_parser('update-product', help='update-product help')
   # At least one of name and ID should be passed; nothing will happen if neither is passed
@@ -499,6 +486,27 @@ def get_date_and_products(date, products):
   if products is None:
     return (None,)
   return date, products
+
+def get_products_to_add(products):
+  _products = []
+  for product in products:
+    product = [value.strip() for value in product.split(',')]
+    if len(product) > 0 and product[0] != '':
+      _product = {'name':product[0], 'description':'', 'manufacturer':'', 'wholesale_cost':0.0, 'sale_cost':0.0, 'amount':0}
+      if len(product) >= 2:
+        _product['description'] = product[1]
+        if len(product) >= 3:
+          _product['manufacturer'] = product[2]
+          if len(product) >= 4 and product[3].isdecimal():
+            _product['wholesale_cost'] = float(product[3])
+            if len(product) >= 5 and product[4].isdecimal():
+              _product['sale_cost'] = float(product[4])
+              if len(product) >= 6 and product[5].isdecimal():
+                _product['amount'] = int(product[5])
+      _products.append(Product(name=product['name'], description=product['description'],
+                               manufacturer=product['manufacturer'], wholesale_cost=product['wholesale_cost'],
+                               sale_cost=product['sale_cost'], amount=product['amount']))
+  return _products
 
 
 

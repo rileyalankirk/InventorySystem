@@ -15,20 +15,20 @@ from inventory_system import get_dbsession, reset_db
 from os import path
 
 UNIQUE_PRODUCTS_PER_ORDER = 10
-NUMBER_OF_PRODUCTS = 1000 # Should be multiple of UNIQUE_PRODUCTS_PER_ORDER for simplicity
+NUMBER_OF_PRODUCTS = 500 # Should be multiple of UNIQUE_PRODUCTS_PER_ORDER for simplicity
 NUMBER_OF_ORDERS = NUMBER_OF_PRODUCTS // UNIQUE_PRODUCTS_PER_ORDER
 
 
 def prepare_database_for_timing(stub):
     stub.ClearDatabase(inventory_system.Empty())
 
-    product_ids, order_ids = [], []
+    order_ids = []
 
     # Add products to the database
-    for i in range(NUMBER_OF_PRODUCTS):
-        product = inventory_system.Product(name='Product' + str(i), description='A product that carries the number ' + str(i),
-                          manufacturer='Riley Kirkpatrick', wholesale_cost=i, sale_cost=i/2.5, amount=i)
-        product_ids.append(stub.AddProduct(product).id)
+    products = [inventory_system.Product(name='Product' + str(i), description='A product that carries the number ' + str(i),
+                        manufacturer='Riley Kirkpatrick', wholesale_cost=i, sale_cost=i/2.5, amount=i)
+                        for i in range(NUMBER_OF_PRODUCTS)]
+    product_ids = stub.AddProducts(inventory_system.Products(products=products)).ids
 
     # Add orders to the database
     date = inventory_system.Date(year=2020, month=4, day=20)
@@ -58,27 +58,25 @@ def main():
         stub = inventory_system_grpc.InventorySystemStub(channel)
         
         grpc_times = []
-
-        # Timing for GetProductByID
         product_ids, order_ids = prepare_database_for_timing(stub)
+
+        # Timing for GetProductsByID
         start_time = time.monotonic() # The start of the timing
 
-        for id in product_ids:
-            product = stub.GetProductByID(inventory_system.ID(id=id))
+        products = stub.GetProductsByID(inventory_system.IDs(ids=product_ids))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing GetProductByID...')
+        print('Finished timing GetProductsByID...')
 
 
-        # Timing for GetProductByName
+        # Timing for GetProductsByName
         start_time = time.monotonic() # The start of the timing
 
-        for i in range(NUMBER_OF_PRODUCTS):
-            name = 'Product' + str(i)
-            product = stub.GetProductByName(inventory_system.Name(name=name))
+        names = ['Product' + str(i) for i in range(NUMBER_OF_PRODUCTS)]
+        products = stub.GetProductsByName(inventory_system.Names(names=names))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing GetProductByName...')
+        print('Finished timing GetProductsByName...')
 
 
         # Timing for GetProductsByManufacturer
@@ -87,7 +85,7 @@ def main():
         products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer='Riley Kirkpatrick'))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing GetProductByManufacturer...')
+        print('Finished timing GetProductsByManufacturer...')
 
 
         # Timing for GetOrder
@@ -145,17 +143,17 @@ def main():
         print('Finished timing UpdateOrder...')
 
 
-        # Timing for AddProduct
+        # Timing for AddProducts
         prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
-        for i in range(NUMBER_OF_PRODUCTS):
-            product = inventory_system.Product(name=str(i), description='A product of the number ' + str(i),
-                                   manufacturer='Toys R Us', wholesale_cost=i, sale_cost=i/2.5, amount=100)
-            stub.AddProduct(inventory_system.Product())
+        products = [inventory_system.Product(name=str(i), description='A product of the number ' + str(i),
+                                manufacturer='Toys R Us', wholesale_cost=i, sale_cost=i/2.5, amount=100)
+                                for i in range(NUMBER_OF_PRODUCTS)]
+        stub.AddProducts(inventory_system.Products(products=products))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing AddProduct...')
+        print('Finished timing AddProducts...')
 
 
         # Timing for CreateOrder
@@ -177,15 +175,15 @@ def main():
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing CreateOrder...\n\n')
 
-        print('GetProductByID Time:', grpc_times[0])
-        print('GetProductByName Time:', grpc_times[1])
+        print('GetProductsByID Time:', grpc_times[0])
+        print('GetProductsByName Time:', grpc_times[1])
         print('GetProductsByManufacturer Time:', grpc_times[2])
         print('GetOrder Time:', grpc_times[3])
         print('GetOrders Time:', grpc_times[4])
         print('GetProductsInStock Time:', grpc_times[5])
         print('UpdateProduct Time:', grpc_times[6])
         print('UpdateOrder Time:', grpc_times[7])
-        print('AddProduct Time:', grpc_times[8])
+        print('AddProducts Time:', grpc_times[8])
         print('CreateOrder Time:', grpc_times[9])
         print('Total Time:', sum(grpc_times))
 
