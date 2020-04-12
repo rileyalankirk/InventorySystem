@@ -56,13 +56,13 @@ class InventorySystemStub(object):
         request_serializer=inventory__system__pb2.Order.SerializeToString,
         response_deserializer=inventory__system__pb2.ID.FromString,
         )
-    self.UpdateOrder = channel.unary_unary(
-        '/InventorySystem/UpdateOrder',
-        request_serializer=inventory__system__pb2.Order.SerializeToString,
+    self.UpdateOrders = channel.unary_unary(
+        '/InventorySystem/UpdateOrders',
+        request_serializer=inventory__system__pb2.Orders.SerializeToString,
         response_deserializer=inventory__system__pb2.Empty.FromString,
         )
-    self.GetOrders = channel.unary_unary(
-        '/InventorySystem/GetOrders',
+    self.GetOrdersByStatus = channel.unary_unary(
+        '/InventorySystem/GetOrdersByStatus',
         request_serializer=inventory__system__pb2.OrderStatus.SerializeToString,
         response_deserializer=inventory__system__pb2.Orders.FromString,
         )
@@ -141,14 +141,14 @@ class InventorySystemServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def UpdateOrder(self, request, context):
+  def UpdateOrders(self, request, context):
     """Update orders (ID cannot be updated) and if there is not enough product the order is not updated 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetOrders(self, request, context):
+  def GetOrdersByStatus(self, request, context):
     """Retrieves all orders that are unshipped, unpaid, or both  
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -208,13 +208,13 @@ def add_InventorySystemServicer_to_server(servicer, server):
           request_deserializer=inventory__system__pb2.Order.FromString,
           response_serializer=inventory__system__pb2.ID.SerializeToString,
       ),
-      'UpdateOrder': grpc.unary_unary_rpc_method_handler(
-          servicer.UpdateOrder,
-          request_deserializer=inventory__system__pb2.Order.FromString,
+      'UpdateOrders': grpc.unary_unary_rpc_method_handler(
+          servicer.UpdateOrders,
+          request_deserializer=inventory__system__pb2.Orders.FromString,
           response_serializer=inventory__system__pb2.Empty.SerializeToString,
       ),
-      'GetOrders': grpc.unary_unary_rpc_method_handler(
-          servicer.GetOrders,
+      'GetOrdersByStatus': grpc.unary_unary_rpc_method_handler(
+          servicer.GetOrdersByStatus,
           request_deserializer=inventory__system__pb2.OrderStatus.FromString,
           response_serializer=inventory__system__pb2.Orders.SerializeToString,
       ),

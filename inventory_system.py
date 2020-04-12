@@ -82,6 +82,12 @@ def update_product_db(database, products):
     database.query(Product).filter(Product.id == product[0] or Product.name == product[1]).\
                                                 update(products[product], synchronize_session=False)
 
+def update_order_db(database, orders):
+  """Update order rows given a dict of IDs mapped to the new values, i.e., {id:values,...}.
+  """
+  for order in orders:
+    database.query(Order).filter(Order.id == order).update(orders[order], synchronize_session=False)
+
 def save_db(database):
   """Save the database.
   """
@@ -243,7 +249,7 @@ def update_products(database, products):
   """
   try:
     # Creates a dictionary with tuple keys (product.id, product.name) that map to a dict value: the dict contains the
-    # values of the product that are to be updated
+    # values of the product that are to be updated and calls update_product_db to update the database
     _products = {}
     for product in products:
       _products[(product.id, product.name)] = {}
@@ -309,48 +315,53 @@ def create_order(database, order):
     # Allow the interrupt to propagate up 
     raise KeyboardInterrupt
 
-def update_order(database, order):
+def update_orders(database, orders):
   """Updates an order based on the passed order.
   """
   try:
-    # Update an order's destination
-    if order.destination != '':
-      update_db(database, Order, {Order.destination:order.destination}, Order.id==order.id)
-    # Update an order's date
-    year = 0 <= order.date.year <= 9999
-    month = 1 <= order.date.month <= 12
-    day = 1 <= order.date.day <= 31
-    if year and month and day:
-      date = OrderDate(month=order.date.month, day=order.date.day, year=order.date.year)
-      update_db(database, Order, {Order.date:date}, Order.id==order.id)
-    # Update the products of an order (remove, add, or update the quantity of each product)
-    if len(order.products) > 0:
-      old_product_amounts = get_order_products(database, order.id)
-      # Get products to add and remove
-      added_products, removed_products = [], []
-      for product in order.products:
-        try:
-          old_amount = old_product_amounts[product.id]
-          if old_amount <= product.amount:
-            added_products.append(OrderProduct(id=product.id, name=product.name, amount=(product.amount - old_amount)))
-          else:
-            removed_products.append(OrderProduct(id=product.id, name=product.name, amount=(old_amount - product.amount)))
-        except KeyError:
-          # If there is a KeyError, then the product is new to the order
-          added_products.append(OrderProduct(id=product.id, name=product.name, amount=product.amount))
-      if check_product_available(database, added_products):
-        # Update the database
-        add_products_to_order(database, added_products)
-        remove_products_from_order(database, removed_products)
-        new_products = [OrderProduct(id=product.id, name=product.name, amount=product.amount) for product in order.products]
-        update_db(database, Order, {Order.products:new_products}, Order.id==order.id)
+    # Creates a dictionary with the order IDs as the keys that map to a dict value: the dict contains the
+    # values of the order that are to be updated and calls update_order_db to update the database
+    _orders = {}
+    for order in orders:
+      _orders[order.id] = {}
+      # Update an order's destination
+      if order.destination != '':
+        _orders[order.id][Order.destination] = order.destination
+      # Update an order's date
+      year = 0 <= order.date.year <= 9999
+      month = 1 <= order.date.month <= 12
+      day = 1 <= order.date.day <= 31
+      if year and month and day:
+        _orders[order.id][Order.date] = OrderDate(month=order.date.month, day=order.date.day, year=order.date.year)
+      # Update the products of an order (remove, add, or update the quantity of each product)
+      if len(order.products) > 0:
+        old_product_amounts = get_order_products(database, order.id)
+        # Get products to add and remove
+        added_products, removed_products = [], []
+        for product in order.products:
+          try:
+            old_amount = old_product_amounts[product.id]
+            if old_amount <= product.amount:
+              added_products.append(OrderProduct(id=product.id, name=product.name, amount=(product.amount - old_amount)))
+            else:
+              removed_products.append(OrderProduct(id=product.id, name=product.name, amount=(old_amount - product.amount)))
+          except KeyError:
+            # If there is a KeyError, then the product is new to the order
+            added_products.append(OrderProduct(id=product.id, name=product.name, amount=product.amount))
+        if check_product_available(database, added_products):
+          # Update the database
+          add_products_to_order(database, added_products)
+          remove_products_from_order(database, removed_products)
+          new_products = [OrderProduct(id=product.id, name=product.name, amount=product.amount) for product in order.products]
+          _orders[order.id][Order.products] = new_products
 
-    # Update whether an order has been paid for or not
-    if order.is_paid:
-      update_db(database, Order, {Order.is_paid:order.is_paid}, Order.id==order.id)
-    # Update whether an order has been shipped for or not
-    if order.is_shipped:
-      update_db(database, Order, {Order.is_shipped:order.is_shipped}, Order.id==order.id)
+      # Update an order if it was paid for
+      if order.is_paid:
+        _orders[order.id][Order.is_paid] = order.is_paid
+      # Update an order if it shipped
+      if order.is_shipped:
+        _orders[order.id][Order.is_shipped] = order.is_shipped
+    update_order_db(database, _orders)
     save_db(database)
   except KeyboardInterrupt:
     # Save the database if there is a KeyboardInterrupt
@@ -359,7 +370,7 @@ def update_order(database, order):
     # Allow the interrupt to propagate up 
     raise KeyboardInterrupt
 
-def get_orders(database, order_status):
+def get_orders_by_status(database, order_status):
   filter = None
   if order_status.shipped and order_status.paid:
     filter = (Order.is_shipped==True and Order.is_paid==True)
@@ -406,8 +417,8 @@ def add_parsers_and_subparsers(parser):
   getOrderParse.add_argument('id', help='The ID of the order being retrieved')
 
 
-  # Create a parser for GetOrders with arguments for the status of the orders being retrieved
-  getOrdersParse = subparsers.add_parser('get-orders', help='get-orders help')
+  # Create a parser for GetOrdersByStatus with arguments for the status of the orders being retrieved
+  getOrdersParse = subparsers.add_parser('get-orders-by-status', help='get-orders-by-status help')
   getOrdersParse.add_argument('-p', '--paid', type=bool, help='Whether the retrieved orders are paid or not, type an empty'
                                                               'string for false and any other string for true')
   getOrdersParse.add_argument('-a', '--shipped', type=bool, help='Whether the retrieved orders are shipped or not, type an'
@@ -437,7 +448,7 @@ def add_parsers_and_subparsers(parser):
   createOrderParse.add_argument('products', nargs='+', help='The products being ordered and their'
                                                             ' amounts (id,name,amount)')
 
-  updateOrderParse = subparsers.add_parser('update-order', help='update-order help')
+  updateOrderParse = subparsers.add_parser('update-orders', help='update-orders help')
   updateOrderParse.add_argument('id', help='The id of the order being updated')
   updateOrderParse.add_argument('-dest', '--destination', default='', help='The new destination of '
                                                                           'the order being created')
@@ -504,10 +515,12 @@ def get_product_from_list(product, id=False):
       _product['description'] = product[1]
       if len(product) >= 3:
         _product['manufacturer'] = product[2]
-        if len(product) >= 4 and product[3].isdecimal():
-          _product['wholesale_cost'] = float(product[3])
-          if len(product) >= 5 and product[4].isdecimal():
-            _product['sale_cost'] = float(product[4])
+        if len(product) >= 4:
+          if product[3].isdecimal():
+            _product['wholesale_cost'] = float(product[3])
+          if len(product) >= 5:
+            if product[4].isdecimal():
+              _product['sale_cost'] = float(product[4])
             if len(product) >= 6 and product[5].isdecimal():
               _product['amount'] = int(product[5])
     return _product
@@ -537,11 +550,45 @@ def get_products_to_update(products):
         _product['id'] = product[0]
       
     if not _product is None:
-      _products.append(Product(id=product['id'], name=product['name'], description=product['description'],
-                               manufacturer=product['manufacturer'], wholesale_cost=product['wholesale_cost'],
-                               sale_cost=product['sale_cost'], amount=product['amount']))
+      _products.append(Product(id=product['id'], name=_product['name'], description=_product['description'],
+                               manufacturer=_product['manufacturer'], wholesale_cost=_product['wholesale_cost'],
+                               sale_cost=_product['sale_cost'], amount=_product['amount']))
   return _products
 
+def get_order_from_list(order):
+  _order = {'destination':'', 'date':'', 'is_paid':False, 'is_shipped':False, 'products':[]}
+  if len(order) > 0:
+    _order['destination'] = order[0]
+    if len(order) > 1:
+      date = string_to_date(order[1])
+      if not date is None:
+        _order['date'] = date
+      if len(order) > 2:
+        _order['is_paid'] = len(order[2]) > 0
+        if len(order) > 3:
+          _order['is_shipped'] = len(order[3]) > 0
+          if len(order) > 4:
+            products = products_from_arg_list(order[4:])
+            if products is None:
+              return
+            _order['products'] = products
+  if len(_order[products]) > 0:
+    return _order
+
+def get_orders_to_update(orders):
+  _orders = []
+  for order in orders:
+    order = [value.strip() for value in order.split(',')]
+    if len(order) <= 1:
+      continue
+    _order = get_order_from_list(order[1:])
+    # If there is no ID or no products then return
+    if order[0] == '' or _order is None:
+      continue
+    _order['id'] = order[0]
+    _orders.append(Order(id=_order['id'], destination=_order['destination'], date=_order['date'],
+                         is_paid=_order['is_paid'], is_shipped=_order['is_shipped'], products=_order['products']))
+  return _orders
 
 
 

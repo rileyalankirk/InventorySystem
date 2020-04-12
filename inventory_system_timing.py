@@ -98,16 +98,16 @@ def main():
         print('Finished timing GetOrder...')
         
 
-        # Timing for GetOrders
+        # Timing for GetOrdersByStatus
         start_time = time.monotonic() # The start of the timing
 
-        stub.GetOrders(inventory_system.OrderStatus(paid=False, shipped=False))
-        stub.GetOrders(inventory_system.OrderStatus(paid=False, shipped=True))
-        stub.GetOrders(inventory_system.OrderStatus(paid=True, shipped=False))
-        stub.GetOrders(inventory_system.OrderStatus(paid=True, shipped=True))
+        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=False))
+        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=True))
+        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=False))
+        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=True))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing GetOrders...')
+        print('Finished timing GetOrdersByStatus...')
 
 
         # Timing for GetProductsInStock
@@ -130,17 +130,17 @@ def main():
         print('Finished timing UpdateProducts...')
 
 
-        # Timing for UpdateOrder
+        # Timing for UpdateOrders
         _, order_ids = prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
         
         products = [inventory_system.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS*UNIQUE_PRODUCTS_PER_ORDER, (2*NUMBER_OF_ORDERS+1)*UNIQUE_PRODUCTS_PER_ORDER)]
-        for id in order_ids:
-            boolean = random.random() > 0.5
-            stub.UpdateOrder(inventory_system.Order(id=id, is_paid=boolean, is_shipped=not boolean, products=products))
+    
+        orders = [inventory_system.Order(id=id, is_paid=random.random() > 0.5, is_shipped=random.random() <= 0.5, products=products) for id in order_ids]
+        stub.UpdateOrders(inventory_system.Orders(orders=orders))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing UpdateOrder...')
+        print('Finished timing UpdateOrders...')
 
 
         # Timing for AddProducts
@@ -179,10 +179,10 @@ def main():
         print('GetProductsByName Time:', grpc_times[1])
         print('GetProductsByManufacturer Time:', grpc_times[2])
         print('GetOrder Time:', grpc_times[3])
-        print('GetOrders Time:', grpc_times[4])
+        print('GetOrdersByStatus Time:', grpc_times[4])
         print('GetProductsInStock Time:', grpc_times[5])
         print('UpdateProducts Time:', grpc_times[6])
-        print('UpdateOrder Time:', grpc_times[7])
+        print('UpdateOrders Time:', grpc_times[7])
         print('AddProducts Time:', grpc_times[8])
         print('CreateOrder Time:', grpc_times[9])
         print('Total Time:', sum(grpc_times))

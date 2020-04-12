@@ -15,8 +15,6 @@ service InventorySystem {
 
     /* Retrieves all products from a given manufacturer */
     rpc GetProductsByManufacturer (Manufacturer) returns (Products) {}
-    // Future TODO: replace with GetProductsByManufacturers
-    // rpc GetProductsByManufacturers (Manufacturers) returns (Products) {}
     
     /* Adds new products that do not have the same names as previous products and the IDs are
        assigned by the server; returns the IDs of the products if they were added successfully
@@ -44,13 +42,10 @@ service InventorySystem {
     // rpc CreateOrders (Orders) returns (IDs) {}
 
     /* Update orders (ID cannot be updated) and if there is not enough product the order is not updated */
-    rpc UpdateOrder (Order) returns (Empty) {}
-    // Future TODO: replace with UpdateOrders
-    // rpc UpdateOrders (Orders) returns (Empty) {}
+    rpc UpdateOrders (Orders) returns (Empty) {}
 
     /* Retrieves all orders that are unshipped, unpaid, or both  */
-    rpc GetOrders (OrderStatus) returns (Orders) {}
-    // Future TODO: rename GetOrders to GetOrdersByStatus
+    rpc GetOrdersByStatus (OrderStatus) returns (Orders) {}
 
     // Future TODO: create new GetOrders that returns all orders
     // rpc GetOrders (Empty) returns (Orders) {}

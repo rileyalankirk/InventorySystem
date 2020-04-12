@@ -16,7 +16,7 @@ import uuid
 from concurrent import futures
 from inventory_system import create_inventory_system_db, get_dbsession, reset_db, get_products_by_id, get_products_by_name,\
                              get_products_by_manufacturer, add_products, update_products, get_products_in_stock,\
-                             get_order, create_order, get_orders, update_order
+                             get_order, create_order, get_orders_by_status, update_orders
 from os import path
 
 
@@ -110,16 +110,16 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     id = create_order(self.database, request)
     return inventory_system.ID(id=id)
 
-  def UpdateOrder(self, request, context):
+  def UpdateOrders(self, request, context):
     """Update orders (ID cannot be updated) and if there is not enough product the order is not updated
     """
-    update_order(self.database, request)
+    update_orders(self.database, request.orders)
     return inventory_system.Empty()
 
-  def GetOrders(self, request, context):
+  def GetOrdersByStatus(self, request, context):
     """Retrieves all orders that are unshipped, unpaid, or both  
     """
-    orders = get_orders(self.database, request)
+    orders = get_orders_by_status(self.database, request)
     if len(orders) == 0:
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details('No orders were found satisfying is_paid=' + str(request.paid) +

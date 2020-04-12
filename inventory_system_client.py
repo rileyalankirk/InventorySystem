@@ -10,7 +10,7 @@ import sys
 import inventory_system_pb2 as inventory_system
 import inventory_system_pb2_grpc as inventory_system_grpc
 from inventory_system import add_parsers_and_subparsers, get_date_and_products, products_from_arg_list,\
-                             string_to_date, get_products_to_add, get_products_to_update
+                             string_to_date, get_products_to_add, get_products_to_update, get_orders_to_update
 
 def to_inventory_system_products(products):
     """Converts a list of products to a list of inventory_system.Product objects.
@@ -21,6 +21,18 @@ def to_inventory_system_products(products):
                                                   manufacturer=product.manufacturer, wholesale_cost=product.wholesale_cost,
                                                   sale_cost=product.sale_cost, amount=product.amount))
     return _products
+
+def to_inventory_system_orders(orders):
+    """Converts a list of orders to a list of inventory_system.Order objects.
+    """
+    _orders = []
+    for order in orders:
+        if order.date == '':
+            order.date = inventory_system.Date(month=-1, day=-1, year=-1)
+        products = [inventory_system.Product(id=product.id, name=product.name, amount=product.amount) for product in order.products]
+        _orders.append(inventory_system.Order(id=order.id, destination=order.destination, date=order.date,
+                                              is_paid=order.is_paid, is_shipped=order.is_shipped, products=products))
+    return _orders
 
 def main():
     # Create an argument parser with a required ip argument and subparsers for each function that
@@ -66,8 +78,8 @@ def main():
             elif args.command == 'get-order':
                 order = stub.GetOrder(inventory_system.ID(id=args.id))
                 print(order)
-            elif args.command == 'get-orders':
-                orders = stub.GetOrders(inventory_system.OrderStatus(paid=args.paid, shipped=args.shipped))
+            elif args.command == 'get-orders-by-status':
+                orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=args.paid, shipped=args.shipped))
                 for order in orders.orders: print(order)
             elif args.command == 'add-products':
                 products = to_inventory_system_products(get_products_to_add(args.products))
@@ -93,23 +105,9 @@ def main():
                     print('Order ID:', order_id.id)
                 else:
                     print('Order creation was not successful. It may already exist. Try the get-order command.')
-            elif args.command == 'update-order':
-                date, products = '', []
-                if args.date != '':
-                    date = string_to_date(args.date)
-                    if not date is None:
-                        date = inventory_system.Date(year=date.month, month=date.month, day=date.day)
-                else:
-                    date = inventory_system.Date(month=-1, day=-1, year=-1)
-                if len(args.products) > 0:
-                    products = products_from_arg_list(args.products)
-                    if not products is None:
-                        products = [inventory_system.Product(id=product.id, name=product.name, amount=product.amount) for product in products]
-                if date is None or products is None:
-                    return
-                order_id = stub.UpdateOrder(inventory_system.Order(id=args.id, destination=args.destination,
-                                            date=date, is_paid=args.is_paid, is_shipped=args.is_shipped,
-                                            products=products))
+            elif args.command == 'update-orders':
+                orders = to_inventory_system_orders(get_orders_to_update(args.orders))
+                stub.UpdateOrders(inventory_system.Orders(orders=orders))
         except grpc.RpcError as e:
             print(e.details())
 
