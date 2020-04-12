@@ -23,10 +23,8 @@ service InventorySystem {
        otherwise empty list of IDs */
     rpc AddProducts (Products) returns (IDs) {}
 
-    /* Update products (name and ID cannot be updated) */
-    rpc UpdateProduct (Product) returns (Empty) {}
-    // Future TODO: replace with UpdateProducts
-    // rpc UpdateProducts (Products) returns (Empty) {}
+    /* Updates products (name and ID cannot be updated) */
+    rpc UpdateProducts (Products) returns (Empty) {}
 
     /* Retrieves all products that are in stock  */
     rpc GetProductsInStock (Empty) returns (Products) {}

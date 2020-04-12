@@ -36,9 +36,9 @@ class InventorySystemStub(object):
         request_serializer=inventory__system__pb2.Products.SerializeToString,
         response_deserializer=inventory__system__pb2.IDs.FromString,
         )
-    self.UpdateProduct = channel.unary_unary(
-        '/InventorySystem/UpdateProduct',
-        request_serializer=inventory__system__pb2.Product.SerializeToString,
+    self.UpdateProducts = channel.unary_unary(
+        '/InventorySystem/UpdateProducts',
+        request_serializer=inventory__system__pb2.Products.SerializeToString,
         response_deserializer=inventory__system__pb2.Empty.FromString,
         )
     self.GetProductsInStock = channel.unary_unary(
@@ -109,8 +109,8 @@ class InventorySystemServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def UpdateProduct(self, request, context):
-    """Update products (name and ID cannot be updated) 
+  def UpdateProducts(self, request, context):
+    """Updates products (name and ID cannot be updated) 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -188,9 +188,9 @@ def add_InventorySystemServicer_to_server(servicer, server):
           request_deserializer=inventory__system__pb2.Products.FromString,
           response_serializer=inventory__system__pb2.IDs.SerializeToString,
       ),
-      'UpdateProduct': grpc.unary_unary_rpc_method_handler(
-          servicer.UpdateProduct,
-          request_deserializer=inventory__system__pb2.Product.FromString,
+      'UpdateProducts': grpc.unary_unary_rpc_method_handler(
+          servicer.UpdateProducts,
+          request_deserializer=inventory__system__pb2.Products.FromString,
           response_serializer=inventory__system__pb2.Empty.SerializeToString,
       ),
       'GetProductsInStock': grpc.unary_unary_rpc_method_handler(

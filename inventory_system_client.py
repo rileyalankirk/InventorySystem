@@ -10,7 +10,7 @@ import sys
 import inventory_system_pb2 as inventory_system
 import inventory_system_pb2_grpc as inventory_system_grpc
 from inventory_system import add_parsers_and_subparsers, get_date_and_products, products_from_arg_list,\
-                             string_to_date, get_products_to_add
+                             string_to_date, get_products_to_add, get_products_to_update
 
 def to_inventory_system_products(products):
     """Converts a list of products to a list of inventory_system.Product objects.
@@ -78,10 +78,9 @@ def main():
                         print(id)
                 else:
                     print('Product creation was not successful. It may already exist. Try the get-product-by-* commands.')
-            elif args.command == 'update-product':
-                return_val = stub.UpdateProduct(inventory_system.Product(id=args.id, name=args.name, description=args.description,
-                                            manufacturer=args.manufacturer, wholesale_cost=args.wholesale_cost,
-                                            sale_cost=args.sale_cost, amount=args.amount))
+            elif args.command == 'update-products':
+                products = to_inventory_system_products(get_products_to_update(args.products))
+                stub.UpdateProducts(inventory_system.Products(products=products))
             elif args.command == 'create-order':
                 date, products = get_date_and_products(args.date, args.products)
                 if date is None:

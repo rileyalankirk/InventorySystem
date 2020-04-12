@@ -15,7 +15,7 @@ import sys
 import uuid
 from concurrent import futures
 from inventory_system import create_inventory_system_db, get_dbsession, reset_db, get_products_by_id, get_products_by_name,\
-                             get_products_by_manufacturer, add_products, update_product, get_products_in_stock,\
+                             get_products_by_manufacturer, add_products, update_products, get_products_in_stock,\
                              get_order, create_order, get_orders, update_order
 from os import path
 
@@ -83,10 +83,10 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     """
     return inventory_system.IDs(ids=add_products(self.database, request.products))
 
-  def UpdateProduct(self, request, context):
-    """Update products (name and ID cannot be updated)
+  def UpdateProducts(self, request, context):
+    """Updates products (name and ID cannot be updated)
     """
-    update_product(self.database, request)
+    update_products(self.database, request.products)
     return inventory_system.Empty()
 
   def GetProductsInStock(self, request, context):

@@ -52,26 +52,45 @@ def get_dbsession(database_path):
   return DBSession()
 
 def query_db(database, query, filter=None):
+  """Query a database with or without a filter and return all values of the query.
+  """
   query = database.query(query)
   if filter is None:
     return query.all()
   return query.filter(filter).all()
 
 def add_db(database, values):
+  """Add values to the database and flush them.
+  """
   database.add_all(values)
   database.flush()
 
 def update_db(database, query, values, filter=None):
+  """Update rows in the database based on a query and possibly a filter.
+  """
   if filter is None:
-    database.query(query).update(values)
+    database.query(query).update(values, synchronize_session=False)
+    #database.query(query).filter(filter).update({'status': status})
   else:
-    database.query(query).filter(filter).update(values)
+    database.query(query).filter(filter).update(values, synchronize_session=False)
+
+def update_product_db(database, products):
+  """Update product rows given a dict of tuple (id,name) for each product as keys to the new values,
+  i.e., {(id,name):values,...}.
+  """
+  for product in products:
+    database.query(Product).filter(Product.id == product[0] or Product.name == product[1]).\
+                                                update(products[product], synchronize_session=False)
 
 def save_db(database):
+  """Save the database.
+  """
   # The parameter database must be an instance of DBSession
   database.commit()
 
 def reset_db(database):
+  """Reset the database by removing all products and orders from it.
+  """
   database.query(Product).delete()
   database.query(Order).delete()
   save_db(database)
@@ -219,30 +238,31 @@ def add_products(database, products):
     print('There was an issue adding products: ' + e)
     return []
 
-def update_product(database, product):
-  """Updates a product based on the passed product.
+def update_products(database, products):
+  """Updates products based on the passed products.
   """
   try:
-    # Update a product's description
-    if product.description != '':
-      update_db(database, Product, {Product.description:product.description},
-                (Product.name==product.name or Product.id==product.id))
-    # Update a product's manufacturer
-    if product.manufacturer != '':
-      update_db(database, Product, {Product.manufacturer:product.manufacturer},
-                (Product.name==product.name or Product.id==product.id))
-    # Update a product's wholesale_cost
-    if product.wholesale_cost >= 0:
-      update_db(database, Product, {Product.wholesale_cost:product.wholesale_cost},
-                (Product.name==product.name or Product.id==product.id))
-    # Update a product's sale_cost
-    if product.sale_cost >= 0:
-      update_db(database, Product, {Product.sale_cost:product.sale_cost},
-                (Product.name==product.name or Product.id==product.id))
-    # Update a product's amount
-    if product.amount >= 0:
-      update_db(database, Product, {Product.amount:product.amount},
-                (Product.name==product.name or Product.id==product.id))
+    # Creates a dictionary with tuple keys (product.id, product.name) that map to a dict value: the dict contains the
+    # values of the product that are to be updated
+    _products = {}
+    for product in products:
+      _products[(product.id, product.name)] = {}
+      # Update a product's description
+      if product.description != '':
+        _products[(product.id, product.name)][Product.description] = product.description
+      # Update a product's manufacturer
+      if product.manufacturer != '':
+        _products[(product.id, product.name)][Product.manufacturer] = product.manufacturer
+      # Update a product's wholesale_cost
+      if product.wholesale_cost >= 0:
+        _products[(product.id, product.name)][Product.wholesale_cost] = product.wholesale_cost
+      # Update a product's sale_cost
+      if product.sale_cost >= 0:
+        _products[(product.id, product.name)][Product.sale_cost] = product.sale_cost
+      # Update a product's amount
+      if product.amount >= 0:
+        _products[(product.id, product.name)][Product.amount] = product.amount
+    update_product_db(database, _products)
     save_db(database)
   except KeyboardInterrupt:
     # Save the database if there is a KeyboardInterrupt
@@ -394,26 +414,16 @@ def add_parsers_and_subparsers(parser):
                                                                   'empty string for false and any other string for true')
 
 
-  # Create a parser for AddProducts and UpdateProduct which each have arguments for a product
+  # Create a parser for AddProducts and UpdateProducts which each have arguments for a product
   addProductParse = subparsers.add_parser('add-products', help='add-products help')
   addProductParse.add_argument('products', nargs='+', help='The products being added (name,description,manufacturer,'
-                                                          'wholesale_cost,sale_cost,amount); only name is required')
+                                                           'wholesale_cost,sale_cost,amount); only name is required')
 
 
-  updateProductParse = subparsers.add_parser('update-product', help='update-product help')
+  updateProductParse = subparsers.add_parser('update-products', help='update-products help')
   # At least one of name and ID should be passed; nothing will happen if neither is passed
-  updateProductParse.add_argument('-i', '--id', default='', help='The id of the product being updated')
-  updateProductParse.add_argument('-n', '--name', default='', help='The name of the product being updated')
-  updateProductParse.add_argument('-d', '--description', default='', help='The new description'
-                                                                          ' of the product')
-  updateProductParse.add_argument('-m', '--manufacturer', default='', help='The new manufacturer'
-                                                                            ' of the product')
-  updateProductParse.add_argument('-w', '--wholesale_cost', default=-1.0, type=float,
-                                  help='The new wholesale cost of the product')
-  updateProductParse.add_argument('-s', '--sale_cost', default=-1.0, type=float,
-                                  help='The new sale cost of the product')
-  updateProductParse.add_argument('-a', '--amount', default=-1, type=int,
-                                  help='The new amount available of the product')
+  addProductParse.add_argument('products', nargs='+', help='The products being updated (id,name,description,manufacturer,'
+                                                           'wholesale_cost,sale_cost,amount); only id or name is required')
 
 
   # Create a parser for CreateOrder and UpdateOrder which each have arguments for a order
@@ -487,26 +497,51 @@ def get_date_and_products(date, products):
     return (None,)
   return date, products
 
+def get_product_from_list(product, id=False):
+  if len(product) > 0 and (product[0] != '' or id):
+    _product = {'name':product[0], 'description':'', 'manufacturer':'', 'wholesale_cost':0.0, 'sale_cost':0.0, 'amount':0}
+    if len(product) >= 2:
+      _product['description'] = product[1]
+      if len(product) >= 3:
+        _product['manufacturer'] = product[2]
+        if len(product) >= 4 and product[3].isdecimal():
+          _product['wholesale_cost'] = float(product[3])
+          if len(product) >= 5 and product[4].isdecimal():
+            _product['sale_cost'] = float(product[4])
+            if len(product) >= 6 and product[5].isdecimal():
+              _product['amount'] = int(product[5])
+    return _product
+
 def get_products_to_add(products):
   _products = []
   for product in products:
     product = [value.strip() for value in product.split(',')]
-    if len(product) > 0 and product[0] != '':
-      _product = {'name':product[0], 'description':'', 'manufacturer':'', 'wholesale_cost':0.0, 'sale_cost':0.0, 'amount':0}
-      if len(product) >= 2:
-        _product['description'] = product[1]
-        if len(product) >= 3:
-          _product['manufacturer'] = product[2]
-          if len(product) >= 4 and product[3].isdecimal():
-            _product['wholesale_cost'] = float(product[3])
-            if len(product) >= 5 and product[4].isdecimal():
-              _product['sale_cost'] = float(product[4])
-              if len(product) >= 6 and product[5].isdecimal():
-                _product['amount'] = int(product[5])
-      _products.append(Product(name=product['name'], description=product['description'],
+    _product = get_product_from_list(product)
+    if not _product is None:
+      _products.append(Product(name=_product['name'], description=_product['description'],
+                               manufacturer=_product['manufacturer'], wholesale_cost=_product['wholesale_cost'],
+                               sale_cost=_product['sale_cost'], amount=_product['amount']))
+  return _products
+
+def get_products_to_update(products):
+  _products = []
+  for product in products:
+    product = [value.strip() for value in product.split(',')]
+    _product = None
+    if len(product) > 1:
+      _product = get_product_from_list(product[1:], id=product[0] != '')
+    if product[0] != '':
+      if _product is None:
+        _product = {'id': product[0]}
+      else:
+        _product['id'] = product[0]
+      
+    if not _product is None:
+      _products.append(Product(id=product['id'], name=product['name'], description=product['description'],
                                manufacturer=product['manufacturer'], wholesale_cost=product['wholesale_cost'],
                                sale_cost=product['sale_cost'], amount=product['amount']))
   return _products
+
 
 
 

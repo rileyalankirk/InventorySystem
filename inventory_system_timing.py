@@ -119,15 +119,15 @@ def main():
         print('Finished timing GetProductsInStock...')
 
 
-        # Timing for UpdateProduct
+        # Timing for UpdateProducts
         start_time = time.monotonic() # The start of the timing
-
-        for id in product_ids:
-            value = random.random()*100
-            stub.UpdateProduct(inventory_system.Product(id=id, wholesale_cost=value*100, sale_cost=value*25, amount=int(value)))
+        
+        products = [inventory_system.Product(id=id, wholesale_cost=random.random()*10000, sale_cost=random.random()*2500,
+                                             amount=int(random.random()*100)) for id in product_ids]
+        stub.UpdateProducts(inventory_system.Products(products=products))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing UpdateProduct...')
+        print('Finished timing UpdateProducts...')
 
 
         # Timing for UpdateOrder
@@ -181,7 +181,7 @@ def main():
         print('GetOrder Time:', grpc_times[3])
         print('GetOrders Time:', grpc_times[4])
         print('GetProductsInStock Time:', grpc_times[5])
-        print('UpdateProduct Time:', grpc_times[6])
+        print('UpdateProducts Time:', grpc_times[6])
         print('UpdateOrder Time:', grpc_times[7])
         print('AddProducts Time:', grpc_times[8])
         print('CreateOrder Time:', grpc_times[9])
