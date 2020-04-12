@@ -60,7 +60,7 @@ def main():
         grpc_times = []
 
         # Timing for GetProductByID
-        product_ids, _ = prepare_database_for_timing(stub)
+        product_ids, order_ids = prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         for id in product_ids:
@@ -71,7 +71,6 @@ def main():
 
 
         # Timing for GetProductByName
-        prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         for i in range(NUMBER_OF_PRODUCTS):
@@ -83,7 +82,6 @@ def main():
 
 
         # Timing for GetProductsByManufacturer
-        prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer='Riley Kirkpatrick'))
@@ -93,7 +91,6 @@ def main():
 
 
         # Timing for GetOrder
-        _, order_ids = prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         for id in order_ids:
@@ -104,7 +101,6 @@ def main():
         
 
         # Timing for GetOrders
-        prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         stub.GetOrders(inventory_system.OrderStatus(paid=False, shipped=False))
@@ -117,7 +113,6 @@ def main():
 
 
         # Timing for GetProductsInStock
-        prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         stub.GetProductsInStock(inventory_system.Empty())
@@ -127,7 +122,6 @@ def main():
 
 
         # Timing for UpdateProduct
-        product_ids, _ = prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         for id in product_ids:
