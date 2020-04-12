@@ -4,6 +4,7 @@ add, and update both products and orders in the system.
 Author: Riley Kirkpatrick
 """
 
+# GetOrders
 
 import argparse
 import grpc
@@ -14,7 +15,7 @@ import sys
 import uuid
 from concurrent import futures
 from inventory_system import create_inventory_system_db, get_dbsession, reset_db, get_product_by_id, get_product_by_name,\
-                             get_product_by_manufacturer, add_product, update_product, get_products_in_stock,\
+                             get_products_by_manufacturer, add_product, update_product, get_products_in_stock,\
                              get_order, create_order, get_orders, update_order
 from os import path
 
@@ -41,7 +42,7 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     return inventory_system.Order(id=order.id, destination=order.destination, date=date, is_paid=order.is_paid,
                                   is_shipped=order.is_shipped, products=products)
 
-  def __get_product_by(self, context, product, error=''):
+  def __get_product_by(self, context, product=None, error=''):
     if error != '':
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details(error)
@@ -69,11 +70,12 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
   def GetProductsByManufacturer(self, request, context):
     """Retrieves all products from a given manufacturer 
     """
-    product = get_product_by_name(self.database, request.manufacturer)
+    products = get_products_by_manufacturer(self.database, request.manufacturer)
     error = ''
-    if product is None:
-      error = 'No products were found for the manufacturer ' + request.manufacturer
-    return self.__get_product_by(context, product, error)
+    if len(products) == 0:
+      context.set_code(grpc.StatusCode.NOT_FOUND)
+      context.set_details('No products were found for the manufacturer ' + request.manufacturer)
+    return [self.to_inventory_system_product(product) for product in products]
 
   def AddProduct(self, request, context):
     """Adds a new product that does not have the same name as previous products and the ID is
@@ -91,8 +93,7 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
   def GetProductsInStock(self, request, context):
     """Retrieves all products that are in stock  
     """
-    for product in get_products_in_stock(self.database):
-      yield self.to_inventory_system_product(product)
+    return [self.to_inventory_system_product(product) for product in get_products_in_stock(self.database)]
 
   def GetOrder(self, request, context):
     """Gets an order by its ID 
@@ -120,14 +121,11 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     """Retrieves all orders that are unshipped, unpaid, or both  
     """
     orders = get_orders(self.database, request)
-    if orders is None:
+    if len(orders) == 0:
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details('No orders were found satisfying is_paid=' + str(request.paid) +
                           ' and/or is_shipped=' + str(request.shipped))
-      yield inventory_system.Order()
-    else:
-      for order in orders:
-        yield self.to_inventory_system_order(order)
+    return [self.to_inventory_system_order(order) for order in orders]
   
   def ClearDatabase(self, request, context):
     """Clears inventory system database

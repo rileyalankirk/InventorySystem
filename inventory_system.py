@@ -193,7 +193,7 @@ def get_product_by_name(database, name):
   """
   return get_product_by_filter(database, (Product.name==name))
 
-def get_product_by_manufacturer(database, manufacturer):
+def get_products_by_manufacturer(database, manufacturer):
   """Returns a Product object of a given name or None if the product is not found.
   """
   return get_product_by_filter(database, (Product.manufacturer==manufacturer))
@@ -349,8 +349,6 @@ def get_orders(database, order_status):
   else:
     filter = (Order.is_shipped==False and Order.is_paid==False)
   orders = query_db(database, Order, filter)
-  if len(orders) == 0:
-    return None
   return orders
 
 

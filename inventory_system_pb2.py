@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x16inventory_system.proto\"\x07\n\x05\x45mpty\"\x10\n\x02ID\x12\n\n\x02id\x18\x01 \x01(\t\"\x14\n\x04Name\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x0cManufacturer\x12\x14\n\x0cmanufacturer\x18\x01 \x01(\t\"\x89\x01\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x14\n\x0cmanufacturer\x18\x04 \x01(\t\x12\x16\n\x0ewholesale_cost\x18\x05 \x01(\x01\x12\x11\n\tsale_cost\x18\x06 \x01(\x01\x12\x0e\n\x06\x61mount\x18\x07 \x01(\x03\",\n\x0bOrderStatus\x12\x0c\n\x04paid\x18\x01 \x01(\x08\x12\x0f\n\x07shipped\x18\x02 \x01(\x08\"0\n\x04\x44\x61te\x12\x0c\n\x04year\x18\x01 \x01(\x05\x12\r\n\x05month\x18\x02 \x01(\x05\x12\x0b\n\x03\x64\x61y\x18\x03 \x01(\x05\"~\n\x05Order\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\t\x12\x13\n\x04\x64\x61te\x18\x03 \x01(\x0b\x32\x05.Date\x12\x1a\n\x08products\x18\x04 \x03(\x0b\x32\x08.Product\x12\x0f\n\x07is_paid\x18\x05 \x01(\x08\x12\x12\n\nis_shipped\x18\x06 \x01(\x08\x32\xa9\x03\n\x0fInventorySystem\x12!\n\x0eGetProductByID\x12\x03.ID\x1a\x08.Product\"\x00\x12%\n\x10GetProductByName\x12\x05.Name\x1a\x08.Product\"\x00\x12\x38\n\x19GetProductsByManufacturer\x12\r.Manufacturer\x1a\x08.Product\"\x00\x30\x01\x12\x1d\n\nAddProduct\x12\x08.Product\x1a\x03.ID\"\x00\x12#\n\rUpdateProduct\x12\x08.Product\x1a\x06.Empty\"\x00\x12*\n\x12GetProductsInStock\x12\x06.Empty\x1a\x08.Product\"\x00\x30\x01\x12\x19\n\x08GetOrder\x12\x03.ID\x1a\x06.Order\"\x00\x12\x1c\n\x0b\x43reateOrder\x12\x06.Order\x1a\x03.ID\"\x00\x12\x1f\n\x0bUpdateOrder\x12\x06.Order\x1a\x06.Empty\"\x00\x12%\n\tGetOrders\x12\x0c.OrderStatus\x1a\x06.Order\"\x00\x30\x01\x12!\n\rClearDatabase\x12\x06.Empty\x1a\x06.Empty\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x16inventory_system.proto\"\x07\n\x05\x45mpty\"\x10\n\x02ID\x12\n\n\x02id\x18\x01 \x01(\t\"\x14\n\x04Name\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x0cManufacturer\x12\x14\n\x0cmanufacturer\x18\x01 \x01(\t\"\x12\n\x03IDs\x12\x0b\n\x03ids\x18\x01 \x03(\t\"\x16\n\x05Names\x12\r\n\x05names\x18\x01 \x03(\t\"&\n\rManufacturers\x12\x15\n\rmanufacturers\x18\x01 \x03(\t\"\x89\x01\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x14\n\x0cmanufacturer\x18\x04 \x01(\t\x12\x16\n\x0ewholesale_cost\x18\x05 \x01(\x01\x12\x11\n\tsale_cost\x18\x06 \x01(\x01\x12\x0e\n\x06\x61mount\x18\x07 \x01(\x03\"&\n\x08Products\x12\x1a\n\x08products\x18\x01 \x03(\x0b\x32\x08.Product\",\n\x0bOrderStatus\x12\x0c\n\x04paid\x18\x01 \x01(\x08\x12\x0f\n\x07shipped\x18\x02 \x01(\x08\"0\n\x04\x44\x61te\x12\x0c\n\x04year\x18\x01 \x01(\x05\x12\r\n\x05month\x18\x02 \x01(\x05\x12\x0b\n\x03\x64\x61y\x18\x03 \x01(\x05\"~\n\x05Order\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\t\x12\x13\n\x04\x64\x61te\x18\x03 \x01(\x0b\x32\x05.Date\x12\x1a\n\x08products\x18\x04 \x03(\x0b\x32\x08.Product\x12\x0f\n\x07is_paid\x18\x05 \x01(\x08\x12\x12\n\nis_shipped\x18\x06 \x01(\x08\" \n\x06Orders\x12\x16\n\x06orders\x18\x01 \x03(\x0b\x32\x06.Order2\xa6\x03\n\x0fInventorySystem\x12!\n\x0eGetProductByID\x12\x03.ID\x1a\x08.Product\"\x00\x12%\n\x10GetProductByName\x12\x05.Name\x1a\x08.Product\"\x00\x12\x37\n\x19GetProductsByManufacturer\x12\r.Manufacturer\x1a\t.Products\"\x00\x12\x1d\n\nAddProduct\x12\x08.Product\x1a\x03.ID\"\x00\x12#\n\rUpdateProduct\x12\x08.Product\x1a\x06.Empty\"\x00\x12)\n\x12GetProductsInStock\x12\x06.Empty\x1a\t.Products\"\x00\x12\x19\n\x08GetOrder\x12\x03.ID\x1a\x06.Order\"\x00\x12\x1c\n\x0b\x43reateOrder\x12\x06.Order\x1a\x03.ID\"\x00\x12\x1f\n\x0bUpdateOrder\x12\x06.Order\x1a\x06.Empty\"\x00\x12$\n\tGetOrders\x12\x0c.OrderStatus\x1a\x07.Orders\"\x00\x12!\n\rClearDatabase\x12\x06.Empty\x1a\x06.Empty\"\x00\x62\x06proto3'
 )
 
 
@@ -141,6 +141,99 @@ _MANUFACTURER = _descriptor.Descriptor(
 )
 
 
+_IDS = _descriptor.Descriptor(
+  name='IDs',
+  full_name='IDs',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ids', full_name='IDs.ids', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=113,
+  serialized_end=131,
+)
+
+
+_NAMES = _descriptor.Descriptor(
+  name='Names',
+  full_name='Names',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='names', full_name='Names.names', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=133,
+  serialized_end=155,
+)
+
+
+_MANUFACTURERS = _descriptor.Descriptor(
+  name='Manufacturers',
+  full_name='Manufacturers',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='manufacturers', full_name='Manufacturers.manufacturers', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=157,
+  serialized_end=195,
+)
+
+
 _PRODUCT = _descriptor.Descriptor(
   name='Product',
   full_name='Product',
@@ -209,8 +302,39 @@ _PRODUCT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=114,
-  serialized_end=251,
+  serialized_start=198,
+  serialized_end=335,
+)
+
+
+_PRODUCTS = _descriptor.Descriptor(
+  name='Products',
+  full_name='Products',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='products', full_name='Products.products', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=337,
+  serialized_end=375,
 )
 
 
@@ -247,8 +371,8 @@ _ORDERSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=253,
-  serialized_end=297,
+  serialized_start=377,
+  serialized_end=421,
 )
 
 
@@ -292,8 +416,8 @@ _DATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=299,
-  serialized_end=347,
+  serialized_start=423,
+  serialized_end=471,
 )
 
 
@@ -358,20 +482,58 @@ _ORDER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=349,
-  serialized_end=475,
+  serialized_start=473,
+  serialized_end=599,
 )
 
+
+_ORDERS = _descriptor.Descriptor(
+  name='Orders',
+  full_name='Orders',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='orders', full_name='Orders.orders', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=601,
+  serialized_end=633,
+)
+
+_PRODUCTS.fields_by_name['products'].message_type = _PRODUCT
 _ORDER.fields_by_name['date'].message_type = _DATE
 _ORDER.fields_by_name['products'].message_type = _PRODUCT
+_ORDERS.fields_by_name['orders'].message_type = _ORDER
 DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 DESCRIPTOR.message_types_by_name['ID'] = _ID
 DESCRIPTOR.message_types_by_name['Name'] = _NAME
 DESCRIPTOR.message_types_by_name['Manufacturer'] = _MANUFACTURER
+DESCRIPTOR.message_types_by_name['IDs'] = _IDS
+DESCRIPTOR.message_types_by_name['Names'] = _NAMES
+DESCRIPTOR.message_types_by_name['Manufacturers'] = _MANUFACTURERS
 DESCRIPTOR.message_types_by_name['Product'] = _PRODUCT
+DESCRIPTOR.message_types_by_name['Products'] = _PRODUCTS
 DESCRIPTOR.message_types_by_name['OrderStatus'] = _ORDERSTATUS
 DESCRIPTOR.message_types_by_name['Date'] = _DATE
 DESCRIPTOR.message_types_by_name['Order'] = _ORDER
+DESCRIPTOR.message_types_by_name['Orders'] = _ORDERS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), {
@@ -402,12 +564,40 @@ Manufacturer = _reflection.GeneratedProtocolMessageType('Manufacturer', (_messag
   })
 _sym_db.RegisterMessage(Manufacturer)
 
+IDs = _reflection.GeneratedProtocolMessageType('IDs', (_message.Message,), {
+  'DESCRIPTOR' : _IDS,
+  '__module__' : 'inventory_system_pb2'
+  # @@protoc_insertion_point(class_scope:IDs)
+  })
+_sym_db.RegisterMessage(IDs)
+
+Names = _reflection.GeneratedProtocolMessageType('Names', (_message.Message,), {
+  'DESCRIPTOR' : _NAMES,
+  '__module__' : 'inventory_system_pb2'
+  # @@protoc_insertion_point(class_scope:Names)
+  })
+_sym_db.RegisterMessage(Names)
+
+Manufacturers = _reflection.GeneratedProtocolMessageType('Manufacturers', (_message.Message,), {
+  'DESCRIPTOR' : _MANUFACTURERS,
+  '__module__' : 'inventory_system_pb2'
+  # @@protoc_insertion_point(class_scope:Manufacturers)
+  })
+_sym_db.RegisterMessage(Manufacturers)
+
 Product = _reflection.GeneratedProtocolMessageType('Product', (_message.Message,), {
   'DESCRIPTOR' : _PRODUCT,
   '__module__' : 'inventory_system_pb2'
   # @@protoc_insertion_point(class_scope:Product)
   })
 _sym_db.RegisterMessage(Product)
+
+Products = _reflection.GeneratedProtocolMessageType('Products', (_message.Message,), {
+  'DESCRIPTOR' : _PRODUCTS,
+  '__module__' : 'inventory_system_pb2'
+  # @@protoc_insertion_point(class_scope:Products)
+  })
+_sym_db.RegisterMessage(Products)
 
 OrderStatus = _reflection.GeneratedProtocolMessageType('OrderStatus', (_message.Message,), {
   'DESCRIPTOR' : _ORDERSTATUS,
@@ -430,6 +620,13 @@ Order = _reflection.GeneratedProtocolMessageType('Order', (_message.Message,), {
   })
 _sym_db.RegisterMessage(Order)
 
+Orders = _reflection.GeneratedProtocolMessageType('Orders', (_message.Message,), {
+  'DESCRIPTOR' : _ORDERS,
+  '__module__' : 'inventory_system_pb2'
+  # @@protoc_insertion_point(class_scope:Orders)
+  })
+_sym_db.RegisterMessage(Orders)
+
 
 
 _INVENTORYSYSTEM = _descriptor.ServiceDescriptor(
@@ -438,8 +635,8 @@ _INVENTORYSYSTEM = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=478,
-  serialized_end=903,
+  serialized_start=636,
+  serialized_end=1058,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetProductByID',
@@ -465,7 +662,7 @@ _INVENTORYSYSTEM = _descriptor.ServiceDescriptor(
     index=2,
     containing_service=None,
     input_type=_MANUFACTURER,
-    output_type=_PRODUCT,
+    output_type=_PRODUCTS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
@@ -492,7 +689,7 @@ _INVENTORYSYSTEM = _descriptor.ServiceDescriptor(
     index=5,
     containing_service=None,
     input_type=_EMPTY,
-    output_type=_PRODUCT,
+    output_type=_PRODUCTS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
@@ -528,7 +725,7 @@ _INVENTORYSYSTEM = _descriptor.ServiceDescriptor(
     index=9,
     containing_service=None,
     input_type=_ORDERSTATUS,
-    output_type=_ORDER,
+    output_type=_ORDERS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(

@@ -3,30 +3,31 @@
 
 syntax = "proto3";
 
+
 /* A service that allows you to keep track of an inventory of products and the orders for those products */
 // Note: Future TODOs are the planned updates for the inventory system to make it more general and more feature-rich
 service InventorySystem {
     /* Gets a product by its ID */
     rpc GetProductByID (ID) returns (Product) {}
     // Future TODO: replace with GetProductsByID
-    // rpc GetProductsByID (IDs) returns (stream Product) {}
+    // rpc GetProductsByID (IDs) returns (Products) {}
 
     /* Gets a product by its name */
     rpc GetProductByName (Name) returns (Product) {}
     // Future TODO: replace with GetProductsByName
-    // rpc GetProductsByName (Names) returns (stream Product) {}
+    // rpc GetProductsByName (Names) returns (Products) {}
 
     /* Retrieves all products from a given manufacturer */
-    rpc GetProductsByManufacturer (Manufacturer) returns (stream Product) {}
+    rpc GetProductsByManufacturer (Manufacturer) returns (Products) {}
     // Future TODO: replace with GetProductsByManufacturers
-    // rpc GetProductsByManufacturers (Manufacturers) returns (stream Product) {}
+    // rpc GetProductsByManufacturers (Manufacturers) returns (Products) {}
 
     /* Adds a new product that does not have the same name as previous products and the ID is
        assigned by the server; returns the ID of the product if it was added successfully
        otherwise empty string */
     rpc AddProduct (Product) returns (ID) {}
     // Future TODO: replace with AddProducts
-    // rpc AddProducts (Products) returns (stream ID) {}
+    // rpc AddProducts (Products) returns (IDs) {}
 
     /* Update products (name and ID cannot be updated) */
     rpc UpdateProduct (Product) returns (Empty) {}
@@ -34,21 +35,21 @@ service InventorySystem {
     // rpc UpdateProducts (Products) returns (Empty) {}
 
     /* Retrieves all products that are in stock  */
-    rpc GetProductsInStock (Empty) returns (stream Product) {}
+    rpc GetProductsInStock (Empty) returns (Products) {}
 
     // Future TODO: Create function to get all products no matter the stock
-    // rpc GetProducts (Empty) returns (stream Product) {}
+    // rpc GetProducts (Empty) returns (Products) {}
 
     /* Gets an order by its ID */
     rpc GetOrder (ID) returns (Order) {}
     // Future TODO: replace with GetOrdersByID
-    // rpc GetOrdersByID (IDs) returns (stream Order) {}
+    // rpc GetOrdersByID (IDs) returns (Orders) {}
 
     /* Creates an order if there is enough product in stock with an ID assigned by the server;
        returns a string if there is an exception otherwise empty string */
     rpc CreateOrder (Order) returns (ID) {}
     // Future TODO: replace with CreateOrders
-    // rpc CreateOrders (Orders) returns (stream ID) {}
+    // rpc CreateOrders (Orders) returns (IDs) {}
 
     /* Update orders (ID cannot be updated) and if there is not enough product the order is not updated */
     rpc UpdateOrder (Order) returns (Empty) {}
@@ -56,11 +57,11 @@ service InventorySystem {
     // rpc UpdateOrders (Orders) returns (Empty) {}
 
     /* Retrieves all orders that are unshipped, unpaid, or both  */
-    rpc GetOrders (OrderStatus) returns (stream Order) {}
+    rpc GetOrders (OrderStatus) returns (Orders) {}
     // Future TODO: rename GetOrders to GetOrdersByStatus
 
     // Future TODO: create new GetOrders that returns all orders
-    // rpc GetOrders (Empty) returns (stream Order) {}
+    // rpc GetOrders (Empty) returns (Orders) {}
 
     /* Clears inventory system database */
     rpc ClearDatabase (Empty) returns (Empty) {}

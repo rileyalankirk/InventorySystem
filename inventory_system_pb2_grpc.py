@@ -6,6 +6,8 @@ import inventory_system_pb2 as inventory__system__pb2
 
 class InventorySystemStub(object):
   """A service that allows you to keep track of an inventory of products and the orders for those products 
+
+  Note: Future TODOs are the planned updates for the inventory system to make it more general and more feature-rich
   """
 
   def __init__(self, channel):
@@ -24,10 +26,10 @@ class InventorySystemStub(object):
         request_serializer=inventory__system__pb2.Name.SerializeToString,
         response_deserializer=inventory__system__pb2.Product.FromString,
         )
-    self.GetProductsByManufacturer = channel.unary_stream(
+    self.GetProductsByManufacturer = channel.unary_unary(
         '/InventorySystem/GetProductsByManufacturer',
         request_serializer=inventory__system__pb2.Manufacturer.SerializeToString,
-        response_deserializer=inventory__system__pb2.Product.FromString,
+        response_deserializer=inventory__system__pb2.Products.FromString,
         )
     self.AddProduct = channel.unary_unary(
         '/InventorySystem/AddProduct',
@@ -39,10 +41,10 @@ class InventorySystemStub(object):
         request_serializer=inventory__system__pb2.Product.SerializeToString,
         response_deserializer=inventory__system__pb2.Empty.FromString,
         )
-    self.GetProductsInStock = channel.unary_stream(
+    self.GetProductsInStock = channel.unary_unary(
         '/InventorySystem/GetProductsInStock',
         request_serializer=inventory__system__pb2.Empty.SerializeToString,
-        response_deserializer=inventory__system__pb2.Product.FromString,
+        response_deserializer=inventory__system__pb2.Products.FromString,
         )
     self.GetOrder = channel.unary_unary(
         '/InventorySystem/GetOrder',
@@ -59,10 +61,10 @@ class InventorySystemStub(object):
         request_serializer=inventory__system__pb2.Order.SerializeToString,
         response_deserializer=inventory__system__pb2.Empty.FromString,
         )
-    self.GetOrders = channel.unary_stream(
+    self.GetOrders = channel.unary_unary(
         '/InventorySystem/GetOrders',
         request_serializer=inventory__system__pb2.OrderStatus.SerializeToString,
-        response_deserializer=inventory__system__pb2.Order.FromString,
+        response_deserializer=inventory__system__pb2.Orders.FromString,
         )
     self.ClearDatabase = channel.unary_unary(
         '/InventorySystem/ClearDatabase',
@@ -73,6 +75,8 @@ class InventorySystemStub(object):
 
 class InventorySystemServicer(object):
   """A service that allows you to keep track of an inventory of products and the orders for those products 
+
+  Note: Future TODOs are the planned updates for the inventory system to make it more general and more feature-rich
   """
 
   def GetProductByID(self, request, context):
@@ -120,7 +124,10 @@ class InventorySystemServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def GetOrder(self, request, context):
-    """Gets an order by its ID 
+    """Future TODO: Create function to get all products no matter the stock
+    rpc GetProducts (Empty) returns (Products) {}
+
+    Gets an order by its ID 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -149,7 +156,10 @@ class InventorySystemServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def ClearDatabase(self, request, context):
-    """Clears inventory system database 
+    """Future TODO: create new GetOrders that returns all orders
+    rpc GetOrders (Empty) returns (Orders) {}
+
+    Clears inventory system database 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -168,10 +178,10 @@ def add_InventorySystemServicer_to_server(servicer, server):
           request_deserializer=inventory__system__pb2.Name.FromString,
           response_serializer=inventory__system__pb2.Product.SerializeToString,
       ),
-      'GetProductsByManufacturer': grpc.unary_stream_rpc_method_handler(
+      'GetProductsByManufacturer': grpc.unary_unary_rpc_method_handler(
           servicer.GetProductsByManufacturer,
           request_deserializer=inventory__system__pb2.Manufacturer.FromString,
-          response_serializer=inventory__system__pb2.Product.SerializeToString,
+          response_serializer=inventory__system__pb2.Products.SerializeToString,
       ),
       'AddProduct': grpc.unary_unary_rpc_method_handler(
           servicer.AddProduct,
@@ -183,10 +193,10 @@ def add_InventorySystemServicer_to_server(servicer, server):
           request_deserializer=inventory__system__pb2.Product.FromString,
           response_serializer=inventory__system__pb2.Empty.SerializeToString,
       ),
-      'GetProductsInStock': grpc.unary_stream_rpc_method_handler(
+      'GetProductsInStock': grpc.unary_unary_rpc_method_handler(
           servicer.GetProductsInStock,
           request_deserializer=inventory__system__pb2.Empty.FromString,
-          response_serializer=inventory__system__pb2.Product.SerializeToString,
+          response_serializer=inventory__system__pb2.Products.SerializeToString,
       ),
       'GetOrder': grpc.unary_unary_rpc_method_handler(
           servicer.GetOrder,
@@ -203,10 +213,10 @@ def add_InventorySystemServicer_to_server(servicer, server):
           request_deserializer=inventory__system__pb2.Order.FromString,
           response_serializer=inventory__system__pb2.Empty.SerializeToString,
       ),
-      'GetOrders': grpc.unary_stream_rpc_method_handler(
+      'GetOrders': grpc.unary_unary_rpc_method_handler(
           servicer.GetOrders,
           request_deserializer=inventory__system__pb2.OrderStatus.FromString,
-          response_serializer=inventory__system__pb2.Order.SerializeToString,
+          response_serializer=inventory__system__pb2.Orders.SerializeToString,
       ),
       'ClearDatabase': grpc.unary_unary_rpc_method_handler(
           servicer.ClearDatabase,
