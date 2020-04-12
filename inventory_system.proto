@@ -1,0 +1,101 @@
+// Compile proto file into Python
+// python3 -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. inventory_system.proto
+
+syntax = "proto3";
+
+/* A service that allows you to keep track of an inventory of products and the orders for those products */
+service InventorySystem {
+    /* Gets a product by its ID */
+    rpc GetProductByID (ID) returns (Product) {}
+
+    /* Gets a product by its name */
+    rpc GetProductByName (Name) returns (Product) {}
+
+    /* Retrieves all products from a given manufacturer */
+    rpc GetProductsByManufacturer (Manufacturer) returns (stream Product) {}
+
+    /* Adds a new product that does not have the same name as previous products and the ID is
+       assigned by the server; returns the ID of the product if it was added successfully
+       otherwise empty string */
+    rpc AddProduct (Product) returns (ID) {}
+
+    /* Update products (name and ID cannot be updated) */
+    rpc UpdateProduct (Product) returns (Empty) {}
+
+    /* Retrieves all products that are in stock  */
+    rpc GetProductsInStock (Empty) returns (stream Product) {}
+
+    
+    /* Gets an order by its ID */
+    rpc GetOrder (ID) returns (Order) {}
+
+    /* Creates an order if there is enough product in stock with an ID assigned by the server;
+       returns a string if there is an exception otherwise empty string */
+    rpc CreateOrder (Order) returns (ID) {}
+
+    /* Update orders (ID cannot be updated) and if there is not enough product the order is not updated */
+    rpc UpdateOrder (Order) returns (Empty) {}
+
+    /* Retrieves all orders that are unshipped, unpaid, or both  */
+    rpc GetOrders (OrderStatus) returns (stream Order) {}
+
+    /* Clears inventory system database */
+    rpc ClearDatabase (Empty) returns (Empty) {}
+
+}
+
+
+/* An empty message for functions with no parameters */
+message Empty {
+}
+
+/* A message for passing the ID of the product or order wanted */
+message ID {
+    string id = 1;
+}
+
+
+/* A message for passing the name of the product wanted */
+message Name {
+    string name = 1;
+}
+
+
+/* The manufacturer of the products wanted */
+message Manufacturer {
+    string manufacturer = 1;
+}
+
+/* A product being added, retrieved, or updated in the inventory system */
+message Product {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string manufacturer = 4;
+    double wholesale_cost = 5;
+    double sale_cost = 6;
+    int64 amount = 7;
+}
+
+/* The status of the orders being retrieved */
+message OrderStatus {
+    bool paid = 1;
+    bool shipped = 2;
+}
+
+/* The date at which an order was placed */
+message Date {
+    int32 year = 1;
+    int32 month = 2;
+    int32 day = 3;
+}
+
+/* An order being added, retrieved, or updated in the inventory system */
+message Order {
+    string id = 1;
+    string destination = 2;
+    Date date = 3;
+    repeated Product products = 4;
+    bool is_paid = 5;
+    bool is_shipped = 6;
+}
