@@ -4,40 +4,63 @@
 syntax = "proto3";
 
 /* A service that allows you to keep track of an inventory of products and the orders for those products */
+// Note: Future TODOs are the planned updates for the inventory system to make it more general and more feature-rich
 service InventorySystem {
     /* Gets a product by its ID */
     rpc GetProductByID (ID) returns (Product) {}
+    // Future TODO: replace with GetProductsByID
+    // rpc GetProductsByID (IDs) returns (stream Product) {}
 
     /* Gets a product by its name */
     rpc GetProductByName (Name) returns (Product) {}
+    // Future TODO: replace with GetProductsByName
+    // rpc GetProductsByName (Names) returns (stream Product) {}
 
     /* Retrieves all products from a given manufacturer */
     rpc GetProductsByManufacturer (Manufacturer) returns (stream Product) {}
+    // Future TODO: replace with GetProductsByManufacturers
+    // rpc GetProductsByManufacturers (Manufacturers) returns (stream Product) {}
 
     /* Adds a new product that does not have the same name as previous products and the ID is
        assigned by the server; returns the ID of the product if it was added successfully
        otherwise empty string */
     rpc AddProduct (Product) returns (ID) {}
+    // Future TODO: replace with AddProducts
+    // rpc AddProducts (Products) returns (stream ID) {}
 
     /* Update products (name and ID cannot be updated) */
     rpc UpdateProduct (Product) returns (Empty) {}
+    // Future TODO: replace with UpdateProducts
+    // rpc UpdateProducts (Products) returns (Empty) {}
 
     /* Retrieves all products that are in stock  */
     rpc GetProductsInStock (Empty) returns (stream Product) {}
 
-    
+    // Future TODO: Create function to get all products no matter the stock
+    // rpc GetProducts (Empty) returns (stream Product) {}
+
     /* Gets an order by its ID */
     rpc GetOrder (ID) returns (Order) {}
+    // Future TODO: replace with GetOrdersByID
+    // rpc GetOrdersByID (IDs) returns (stream Order) {}
 
     /* Creates an order if there is enough product in stock with an ID assigned by the server;
        returns a string if there is an exception otherwise empty string */
     rpc CreateOrder (Order) returns (ID) {}
+    // Future TODO: replace with CreateOrders
+    // rpc CreateOrders (Orders) returns (stream ID) {}
 
     /* Update orders (ID cannot be updated) and if there is not enough product the order is not updated */
     rpc UpdateOrder (Order) returns (Empty) {}
+    // Future TODO: replace with UpdateOrders
+    // rpc UpdateOrders (Orders) returns (Empty) {}
 
     /* Retrieves all orders that are unshipped, unpaid, or both  */
     rpc GetOrders (OrderStatus) returns (stream Order) {}
+    // Future TODO: rename GetOrders to GetOrdersByStatus
+
+    // Future TODO: create new GetOrders that returns all orders
+    // rpc GetOrders (Empty) returns (stream Order) {}
 
     /* Clears inventory system database */
     rpc ClearDatabase (Empty) returns (Empty) {}
@@ -66,6 +89,23 @@ message Manufacturer {
     string manufacturer = 1;
 }
 
+/* A message for passing the IDs of products or order wanted */
+message IDs {
+    repeated string ids = 1;
+}
+
+
+/* A message for passing the names of products wanted */
+message Names {
+    repeated string names = 1;
+}
+
+
+/* The manufacturer of the products wanted */
+message Manufacturers {
+    repeated string manufacturers = 1;
+}
+
 /* A product being added, retrieved, or updated in the inventory system */
 message Product {
     string id = 1;
@@ -75,6 +115,11 @@ message Product {
     double wholesale_cost = 5;
     double sale_cost = 6;
     int64 amount = 7;
+}
+
+/* Products being added, retrieved, or updated in the inventory system */
+message Products {
+    repeated Product products = 1;
 }
 
 /* The status of the orders being retrieved */
@@ -98,4 +143,9 @@ message Order {
     repeated Product products = 4;
     bool is_paid = 5;
     bool is_shipped = 6;
+}
+
+/* Orders being added, retrieved, or updated in the inventory system */
+message Orders {
+    repeated Order orders = 1;
 }

@@ -19,12 +19,6 @@ NUMBER_OF_PRODUCTS = 1000 # Should be multiple of UNIQUE_PRODUCTS_PER_ORDER for 
 NUMBER_OF_ORDERS = NUMBER_OF_PRODUCTS // UNIQUE_PRODUCTS_PER_ORDER
 
 
-def sum(array):
-    total = 0
-    for val in array:
-        total += val
-    return total
-
 def prepare_database_for_timing(stub):
     stub.ClearDatabase(inventory_system.Empty())
 
