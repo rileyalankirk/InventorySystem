@@ -16,7 +16,7 @@ import uuid
 from concurrent import futures
 from inventory_system import create_inventory_system_db, get_dbsession, reset_db, get_products_by_id, get_products_by_name,\
                              get_products_by_manufacturer, add_products, update_products, get_products_in_stock,\
-                             get_orders_by_id, create_order, get_orders_by_status, update_orders
+                             get_orders_by_id, create_orders, get_orders_by_status, update_orders
 from os import path
 
 
@@ -103,12 +103,15 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
       context.set_details('No orders were found for the ids ' + str(request.ids))
     return inventory_system.Orders(orders=[self.to_inventory_system_order(order) for order in orders])
 
-  def CreateOrder(self, request, context):
+  def CreateOrders(self, request, context):
     """Creates an order if there is enough product in stock with an ID assigned by the server;
     returns the ID of the product if it was added successfully otherwise empty string
     """
-    id = create_order(self.database, request)
-    return inventory_system.ID(id=id)
+    ids = create_orders(self.database, request.orders)
+    if len(ids) == 0:
+      context.set_code(grpc.StatusCode.NOT_FOUND)
+      context.set_details('Failed to create all orders.')
+    return inventory_system.IDs(ids=ids)
 
   def UpdateOrders(self, request, context):
     """Update orders (ID cannot be updated) and if there is not enough product the order is not updated

@@ -51,10 +51,10 @@ class InventorySystemStub(object):
         request_serializer=inventory__system__pb2.IDs.SerializeToString,
         response_deserializer=inventory__system__pb2.Orders.FromString,
         )
-    self.CreateOrder = channel.unary_unary(
-        '/InventorySystem/CreateOrder',
-        request_serializer=inventory__system__pb2.Order.SerializeToString,
-        response_deserializer=inventory__system__pb2.ID.FromString,
+    self.CreateOrders = channel.unary_unary(
+        '/InventorySystem/CreateOrders',
+        request_serializer=inventory__system__pb2.Orders.SerializeToString,
+        response_deserializer=inventory__system__pb2.IDs.FromString,
         )
     self.UpdateOrders = channel.unary_unary(
         '/InventorySystem/UpdateOrders',
@@ -133,7 +133,7 @@ class InventorySystemServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def CreateOrder(self, request, context):
+  def CreateOrders(self, request, context):
     """Creates an order if there is enough product in stock with an ID assigned by the server;
     returns a string if there is an exception otherwise empty string 
     """
@@ -203,10 +203,10 @@ def add_InventorySystemServicer_to_server(servicer, server):
           request_deserializer=inventory__system__pb2.IDs.FromString,
           response_serializer=inventory__system__pb2.Orders.SerializeToString,
       ),
-      'CreateOrder': grpc.unary_unary_rpc_method_handler(
-          servicer.CreateOrder,
-          request_deserializer=inventory__system__pb2.Order.FromString,
-          response_serializer=inventory__system__pb2.ID.SerializeToString,
+      'CreateOrders': grpc.unary_unary_rpc_method_handler(
+          servicer.CreateOrders,
+          request_deserializer=inventory__system__pb2.Orders.FromString,
+          response_serializer=inventory__system__pb2.IDs.SerializeToString,
       ),
       'UpdateOrders': grpc.unary_unary_rpc_method_handler(
           servicer.UpdateOrders,

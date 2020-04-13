@@ -20,9 +20,8 @@ NUMBER_OF_ORDERS = NUMBER_OF_PRODUCTS // UNIQUE_PRODUCTS_PER_ORDER
 
 
 def prepare_database_for_timing(stub):
+    # Empty the database
     stub.ClearDatabase(inventory_system.Empty())
-
-    order_ids = []
 
     # Add products to the database
     products = [inventory_system.Product(name='Product' + str(i), description='A product that carries the number ' + str(i),
@@ -32,19 +31,14 @@ def prepare_database_for_timing(stub):
 
     # Add orders to the database
     date = inventory_system.Date(year=2020, month=4, day=20)
+    orders = []
     for i in range(NUMBER_OF_ORDERS):
-        is_paid, is_shipped = False, False
-        if i % 2 == 0:
-            is_paid = True
-        else:
-            is_shipped = True
         # Since amount=i//2, Product0 and Product1 should not be added to the first order
         products = [inventory_system.Product(name='Product' + str(i), amount=i//2) for i in range(i*UNIQUE_PRODUCTS_PER_ORDER, (i+1)*UNIQUE_PRODUCTS_PER_ORDER)]
-        order = inventory_system.Order(destination=str(i) + ' Main St, Bethlehem, PA 18018', date=date, products=products,
-                      is_paid=is_paid, is_shipped=is_shipped)
-        order_ids.append(stub.CreateOrder(order).id)
+        orders.append(inventory_system.Order(destination=str(i) + ' Main St, Bethlehem, PA 18018', date=date,
+                                             products=products, is_paid=i % 2 == 0, is_shipped=i % 2 != 0))
     
-    return product_ids, order_ids
+    return product_ids, stub.CreateOrders(inventory_system.Orders(orders=orders)).ids
 
 
 def main():
@@ -63,7 +57,7 @@ def main():
         # Timing for GetProductsByID
         start_time = time.monotonic() # The start of the timing
 
-        products = stub.GetProductsByID(inventory_system.IDs(ids=product_ids))
+        products = stub.GetProductsByID(inventory_system.IDs(ids=product_ids)).products
 
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing GetProductsByID...')
@@ -73,7 +67,7 @@ def main():
         start_time = time.monotonic() # The start of the timing
 
         names = ['Product' + str(i) for i in range(NUMBER_OF_PRODUCTS)]
-        products = stub.GetProductsByName(inventory_system.Names(names=names))
+        products = stub.GetProductsByName(inventory_system.Names(names=names)).products
 
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing GetProductsByName...')
@@ -82,7 +76,7 @@ def main():
         # Timing for GetProductsByManufacturer
         start_time = time.monotonic() # The start of the timing
 
-        products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer='Riley Kirkpatrick'))
+        products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer='Riley Kirkpatrick')).products
 
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing GetProductsByManufacturer...')
@@ -91,7 +85,7 @@ def main():
         # Timing for GetOrdersByID
         start_time = time.monotonic() # The start of the timing
 
-        order = stub.GetOrdersByID(inventory_system.IDs(ids=order_ids))
+        orders = stub.GetOrdersByID(inventory_system.IDs(ids=order_ids)).orders
 
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing GetOrdersByID...')
@@ -100,10 +94,10 @@ def main():
         # Timing for GetOrdersByStatus
         start_time = time.monotonic() # The start of the timing
 
-        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=False))
-        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=True))
-        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=False))
-        stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=True))
+        orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=False)).orders
+        orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=True)).orders
+        orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=False)).orders
+        orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=True)).orders
 
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing GetOrdersByStatus...')
@@ -112,7 +106,7 @@ def main():
         # Timing for GetProductsInStock
         start_time = time.monotonic() # The start of the timing
 
-        stub.GetProductsInStock(inventory_system.Empty())
+        products = stub.GetProductsInStock(inventory_system.Empty()).products
 
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing GetProductsInStock...')
@@ -132,9 +126,8 @@ def main():
         # Timing for UpdateOrders
         _, order_ids = prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
-        
-        products = [inventory_system.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS*UNIQUE_PRODUCTS_PER_ORDER, (2*NUMBER_OF_ORDERS+1)*UNIQUE_PRODUCTS_PER_ORDER)]
-    
+
+        products = [inventory_system.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS, 2*NUMBER_OF_ORDERS+1)]
         orders = [inventory_system.Order(id=id, is_paid=random.random() > 0.5, is_shipped=random.random() <= 0.5, products=products) for id in order_ids]
         stub.UpdateOrders(inventory_system.Orders(orders=orders))
 
@@ -149,30 +142,26 @@ def main():
         products = [inventory_system.Product(name=str(i), description='A product of the number ' + str(i),
                                 manufacturer='Toys R Us', wholesale_cost=i, sale_cost=i/2.5, amount=100)
                                 for i in range(NUMBER_OF_PRODUCTS)]
-        stub.AddProducts(inventory_system.Products(products=products))
+        ids = stub.AddProducts(inventory_system.Products(products=products)).ids
 
         grpc_times.append(time.monotonic() - start_time)
         print('Finished timing AddProducts...')
 
 
-        # Timing for CreateOrder
+        # Timing for CreateOrders
         prepare_database_for_timing(stub)
         start_time = time.monotonic() # The start of the timing
 
         date = inventory_system.Date(year=2020, month=4, day=20)
+        orders = []
         for i in range(NUMBER_OF_ORDERS):
-            is_paid, is_shipped = False, False
-            if i % 2 == 0:
-                is_paid = True
-            else:
-                is_shipped = True
-            products = [inventory_system.Product(name=str(i), amount=1) for i in range(i*UNIQUE_PRODUCTS_PER_ORDER, (i+1)*UNIQUE_PRODUCTS_PER_ORDER)]
-            order = inventory_system.Order(destination="Elmo's World", date=date, products=products, is_paid=is_paid,
-                               is_shipped=is_shipped)
-            stub.CreateOrder(order)
+            products = [inventory_system.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS, 2*NUMBER_OF_ORDERS+1)]
+            orders.append(inventory_system.Order(destination="Elmo's World", date=date, products=products,
+                                                 is_paid=i % 2 == 0, is_shipped=i % 2 != 0))
+        ids = stub.CreateOrders(inventory_system.Orders(orders=orders)).ids
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing CreateOrder...\n\n')
+        print('Finished timing CreateOrders...\n\n')
 
         print('GetProductsByID Time:', grpc_times[0])
         print('GetProductsByName Time:', grpc_times[1])
@@ -183,7 +172,7 @@ def main():
         print('UpdateProducts Time:', grpc_times[6])
         print('UpdateOrders Time:', grpc_times[7])
         print('AddProducts Time:', grpc_times[8])
-        print('CreateOrder Time:', grpc_times[9])
+        print('CreateOrders Time:', grpc_times[9])
         print('Total Time:', sum(grpc_times))
 
 

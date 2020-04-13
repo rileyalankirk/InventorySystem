@@ -35,9 +35,7 @@ service InventorySystem {
 
     /* Creates an order if there is enough product in stock with an ID assigned by the server;
        returns a string if there is an exception otherwise empty string */
-    rpc CreateOrder (Order) returns (ID) {}
-    // Future TODO: replace with CreateOrders
-    // rpc CreateOrders (Orders) returns (IDs) {}
+    rpc CreateOrders (Orders) returns (IDs) {}
 
     /* Update orders (ID cannot be updated) and if there is not enough product the order is not updated */
     rpc UpdateOrders (Orders) returns (Empty) {}

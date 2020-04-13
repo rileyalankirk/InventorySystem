@@ -156,7 +156,8 @@ def get_order_product(database, prod_for_id, prod_for_name=None, prod_for_amount
   return OrderProduct(id=prod_for_id.id, name=prod_for_name.name, amount=prod_for_amount.amount)
 
 def get_products_new_order(database, requested_products):
-  # Converts a list of inventory_system.Product objects to type OrderProduct
+  """Converts a list of inventory_system.Product objects to type OrderProduct
+  """
   products = []
   for product in requested_products:
     product = get_order_product(database, product, query=True)
@@ -280,24 +281,29 @@ def get_orders_by_id(database, ids):
   """
   return query_db(database, Order, (Order.id.in_(ids)))
 
-def create_order(database, order):
+def create_orders(database, orders):
   """Adds an order to the database and returns the ID or an empty string if the add fails.
   """
   try:
-    id = str(uuid.uuid4())
-    date = OrderDate(month=order.date.month, day=order.date.day, year=order.date.year)
-    products = []
-    if check_product_available(database, order.products):
-      products = get_products_new_order(database, order.products)
 
-    if len(products) > 0:
-      # Update how much product is available
-      add_products_to_order(database, products)
-      add_db(database, [Order(id=id, destination=order.destination, date=date, products=products,
-              is_paid=order.is_paid, is_shipped=order.is_shipped)])
-      save_db(database)
-      return id
-    return ''
+    _orders, ids = [], []
+    dates = [OrderDate(month=orders[i].date.month, day=orders[i].date.day, year=orders[i].date.year) for i in range(len(orders))]
+    
+    for i in range(len(orders)):
+      products = []
+      if check_product_available(database, orders[i].products):
+        products = get_products_new_order(database, orders[i].products)
+
+      if len(products) > 0:
+        # Update how much product is available
+        add_products_to_order(database, products)
+        id = str(uuid.uuid4())
+        ids.append(id)
+        _orders.append(Order(id=id, destination=orders[i].destination, date=dates[i], is_paid=orders[i].is_paid,
+                           is_shipped=orders[i].is_shipped, products=products))
+    add_db(database, _orders)
+    save_db(database)
+    return ids
   except KeyboardInterrupt:
     # Save the database if there is a KeyboardInterrupt
     save_db(database)
@@ -429,15 +435,13 @@ def add_parsers_and_subparsers(parser):
 
 
   # Create a parser for CreateOrder and UpdateOrder which each have arguments for a order
-  createOrderParse = subparsers.add_parser('create-order', help='create-order help')
-  createOrderParse.add_argument('destination', help='The destination of the order being created')
-  createOrderParse.add_argument('date', help='The date the order was placed (MM/DD/YYYY)')
-  createOrderParse.add_argument('-p', '--is_paid', default=False, type=bool,
-                                help='Whether the order is paid for or not, type anything for a value of True')
-  createOrderParse.add_argument('-s', '--is_shipped', default=False, type=bool,
-                                help='Whether the order is shipped or not, type anything for a value of True')
-  createOrderParse.add_argument('products', nargs='+', help='The products being ordered and their'
-                                                            ' amounts (id,name,amount)')
+  createOrderParse = subparsers.add_parser('create-orders', help='create-orders help')
+  createOrderParse.add_argument('orders', nargs='+', help='The orders being created (destination,date,is_paid,'
+                                                           'is_shipped,product1,product2,...,productN); only '
+                                                           'products is required. Products should be (id;name;amount) '
+                                                           'and date should be of the form (MM/DD/YYYY).\nEx. (,2/2/1978'
+                                                           ',,t,id_1;prod1;1,id_2;prod2;2)\nNote that for is_paid and is_shipped'
+                                                           ' a non-empty string results in True and False otherwise.')
 
   updateOrderParse = subparsers.add_parser('update-orders', help='update-orders help')
   updateOrderParse.add_argument('orders', nargs='+', help='The orders being updated (id,destination,date,is_paid,'
@@ -557,6 +561,20 @@ def get_order_from_list(order):
             _order['products'] = products
   if len(_order[products]) > 0:
     return _order
+
+def get_orders_to_create(orders):
+  _orders = []
+  for order in orders:
+    order = [value.strip() for value in order.split(',')]
+    if len(order) <= 1:
+      continue
+    _order = get_order_from_list(order)
+    # If there is no ID or no products then return
+    if _order is None:
+      continue
+    _orders.append(Order(destination=_order['destination'], date=_order['date'],
+                         is_paid=_order['is_paid'], is_shipped=_order['is_shipped'], products=_order['products']))
+  return _orders
 
 def get_orders_to_update(orders):
   _orders = []
