@@ -46,10 +46,10 @@ class InventorySystemStub(object):
         request_serializer=inventory__system__pb2.Empty.SerializeToString,
         response_deserializer=inventory__system__pb2.Products.FromString,
         )
-    self.GetOrder = channel.unary_unary(
-        '/InventorySystem/GetOrder',
-        request_serializer=inventory__system__pb2.ID.SerializeToString,
-        response_deserializer=inventory__system__pb2.Order.FromString,
+    self.GetOrdersByID = channel.unary_unary(
+        '/InventorySystem/GetOrdersByID',
+        request_serializer=inventory__system__pb2.IDs.SerializeToString,
+        response_deserializer=inventory__system__pb2.Orders.FromString,
         )
     self.CreateOrder = channel.unary_unary(
         '/InventorySystem/CreateOrder',
@@ -123,11 +123,11 @@ class InventorySystemServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetOrder(self, request, context):
+  def GetOrdersByID(self, request, context):
     """Future TODO: Create function to get all products no matter the stock
     rpc GetProducts (Empty) returns (Products) {}
 
-    Gets an order by its ID 
+    Gets orders by their ID 
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -198,10 +198,10 @@ def add_InventorySystemServicer_to_server(servicer, server):
           request_deserializer=inventory__system__pb2.Empty.FromString,
           response_serializer=inventory__system__pb2.Products.SerializeToString,
       ),
-      'GetOrder': grpc.unary_unary_rpc_method_handler(
-          servicer.GetOrder,
-          request_deserializer=inventory__system__pb2.ID.FromString,
-          response_serializer=inventory__system__pb2.Order.SerializeToString,
+      'GetOrdersByID': grpc.unary_unary_rpc_method_handler(
+          servicer.GetOrdersByID,
+          request_deserializer=inventory__system__pb2.IDs.FromString,
+          response_serializer=inventory__system__pb2.Orders.SerializeToString,
       ),
       'CreateOrder': grpc.unary_unary_rpc_method_handler(
           servicer.CreateOrder,

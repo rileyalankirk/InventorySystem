@@ -30,10 +30,8 @@ service InventorySystem {
     // Future TODO: Create function to get all products no matter the stock
     // rpc GetProducts (Empty) returns (Products) {}
 
-    /* Gets an order by its ID */
-    rpc GetOrder (ID) returns (Order) {}
-    // Future TODO: replace with GetOrdersByID
-    // rpc GetOrdersByID (IDs) returns (Orders) {}
+    /* Gets orders by their ID */
+    rpc GetOrdersByID (IDs) returns (Orders) {}
 
     /* Creates an order if there is enough product in stock with an ID assigned by the server;
        returns a string if there is an exception otherwise empty string */

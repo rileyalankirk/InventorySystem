@@ -16,7 +16,7 @@ import uuid
 from concurrent import futures
 from inventory_system import create_inventory_system_db, get_dbsession, reset_db, get_products_by_id, get_products_by_name,\
                              get_products_by_manufacturer, add_products, update_products, get_products_in_stock,\
-                             get_order, create_order, get_orders_by_status, update_orders
+                             get_orders_by_id, create_order, get_orders_by_status, update_orders
 from os import path
 
 
@@ -53,7 +53,7 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     """Gets products by their IDs
     """
     products = get_products_by_id(self.database, request.ids)
-    if products is None:
+    if len(products) == 0:
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details('No products were found for the given IDs ' + str(request.ids))
     return inventory_system.Products(products=[self.to_inventory_system_product(product) for product in products])
@@ -62,7 +62,7 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     """Gets a product by its name 
     """
     products = get_products_by_name(self.database, request.names)
-    if products is None:
+    if len(products) == 0:
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details('No products were found for the given names ' + str(request.names))
     return inventory_system.Products(products=[self.to_inventory_system_product(product) for product in products])
@@ -71,7 +71,7 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     """Retrieves all products from a given manufacturer 
     """
     products = get_products_by_manufacturer(self.database, request.manufacturer)
-    if products is None:
+    if len(products) == 0:
       context.set_code(grpc.StatusCode.NOT_FOUND)
       context.set_details('No products were found for the manufacturer ' + str(request.manufacturer))
     return inventory_system.Products(products=[self.to_inventory_system_product(product) for product in products])
@@ -94,14 +94,14 @@ class InventorySystem(inventory_system_grpc.InventorySystemServicer):
     """
     return inventory_system.Products(products=[self.to_inventory_system_product(product) for product in get_products_in_stock(self.database)])
 
-  def GetOrder(self, request, context):
+  def GetOrdersByID(self, request, context):
     """Gets an order by its ID 
     """
-    order = get_order(self.database, request.id)
-    if order is None:
+    orders = get_orders_by_id(self.database, request.ids)
+    if len(orders) == 0:
       context.set_code(grpc.StatusCode.NOT_FOUND)
-      context.set_details('No order was found for the id ' + request.id)
-    return self.to_inventory_system_order(order)
+      context.set_details('No orders were found for the ids ' + str(request.ids))
+    return inventory_system.Orders(orders=[self.to_inventory_system_order(order) for order in orders])
 
   def CreateOrder(self, request, context):
     """Creates an order if there is enough product in stock with an ID assigned by the server;

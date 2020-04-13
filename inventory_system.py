@@ -8,8 +8,9 @@ from sqlalchemy import create_engine, Boolean, Column, Float, Integer, PickleTyp
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-
+# ----------======================---------- <-<>-<>-<>-<>-<>-<>-<>-<>-<>-> ----------======================----------
 # ----------======================---------- Database Functions and Classes ----------======================----------
+# ----------======================---------- <-<>-<>-<>-<>-<>-<>-<>-<>-<>-> ----------======================----------
 
 
 
@@ -54,10 +55,9 @@ def get_dbsession(database_path):
 def query_db(database, query, filter=None):
   """Query a database with or without a filter and return all values of the query.
   """
-  query = database.query(query)
   if filter is None:
-    return query.all()
-  return query.filter(filter).all()
+    return database.query(query).all()
+  return database.query(query).filter(filter).all()
 
 def add_db(database, values):
   """Add values to the database and flush them.
@@ -104,8 +104,9 @@ def reset_db(database):
 
 
 
-
+# ----------==================---------- <-<>-<>-<>-<>-<>-<><>-<>-<>-<>-<>-<>-> ----------==================----------
 # ----------==================---------- Inventory System Functions and Classes ----------==================----------
+# ----------==================---------- <-<>-<>-<>-<>-<>-<><>-<>-<>-<>-<>-<>-> ----------==================----------
 
 
 
@@ -200,28 +201,20 @@ def get_order_products(database, id):
       return {product.id: product.amount for product in order[0].products}
     return {}
 
-def get_products_by_filter(database, filter):
-  """Returns a Product object based on a filter or None if the product is not found.
-  """
-  product = query_db(database, Product, filter)
-  if len(product) == 0:
-    return None
-  return product
-
 def get_products_by_id(database, ids):
   """Returns a Product object of a given ID or None if the product is not found.
   """
-  return get_products_by_filter(database, (Product.id.in_(ids)))
+  return query_db(database, Product, (Product.id.in_(ids)))
 
 def get_products_by_name(database, names):
   """Returns a Product object of a given name or None if the product is not found.
   """
-  return get_products_by_filter(database, (Product.name.in_(names)))
+  return query_db(database, Product, (Product.name.in_(names)))
 
 def get_products_by_manufacturer(database, manufacturer):
   """Returns a Product object of a given name or None if the product is not found.
   """
-  return get_products_by_filter(database, (Product.manufacturer==manufacturer))
+  return query_db(database, Product, (Product.manufacturer==manufacturer))
 
 def add_products(database, products):
   """Adds products to the database and returns their IDs or an empty list if the add fails.
@@ -282,13 +275,10 @@ def get_products_in_stock(database):
   """
   return query_db(database, Product, Product.amount > 0)
 
-def get_order(database, id):
-  """Gets an order by ID or returns None if not found.
+def get_orders_by_id(database, ids):
+  """Gets orders by their IDs or returns None if not found.
   """
-  order = query_db(database, Order, Order.id==id)
-  if len(order) == 0:
-    return None
-  return order[0]
+  return query_db(database, Order, (Order.id.in_(ids)))
 
 def create_order(database, order):
   """Adds an order to the database and returns the ID or an empty string if the add fails.
@@ -386,8 +376,9 @@ def get_orders_by_status(database, order_status):
 
 
 
-
+# ----------=====================---------- <-<>-<>-<>-<>-<>-<>-<>-<>-<>-<>-> ----------=====================----------
 # ----------=====================---------- Inventory System Client Functions ----------=====================----------
+# ----------=====================---------- <-<>-<>-<>-<>-<>-<>-<>-<>-<>-<>-> ----------=====================----------
 
 
 
@@ -413,8 +404,8 @@ def add_parsers_and_subparsers(parser):
   getProdsByManParse = subparsers.add_parser('get-products-by-manufacturer', help='get-products-by-manufacturer help')
   getProdsByManParse.add_argument('manufacturer', help='The manufacturer of the products being retrieved')
 
-  getOrderParse = subparsers.add_parser('get-order', help='get-order help')
-  getOrderParse.add_argument('id', help='The ID of the order being retrieved')
+  getOrderParse = subparsers.add_parser('get-orders-by-id', help='get-orders-by-id help')
+  getOrderParse.add_argument('ids', nargs='+', help='The IDs of the orders being retrieved')
 
 
   # Create a parser for GetOrdersByStatus with arguments for the status of the orders being retrieved
@@ -449,20 +440,12 @@ def add_parsers_and_subparsers(parser):
                                                             ' amounts (id,name,amount)')
 
   updateOrderParse = subparsers.add_parser('update-orders', help='update-orders help')
-  updateOrderParse.add_argument('id', help='The id of the order being updated')
-  updateOrderParse.add_argument('-dest', '--destination', default='', help='The new destination of '
-                                                                          'the order being created')
-  updateOrderParse.add_argument('-d', '--date', default='', help='The date the order was placed '
-                                                                '(MM/DD/YYYY) - requires both / '
-                                                                'even if a value is left empty')
-  updateOrderParse.add_argument('-paid', '--is_paid', default=False, type=bool,
-                                help='Whether the order is paid for or not, type anything for a value of True')
-  updateOrderParse.add_argument('-s', '--is_shipped', default=False, type=bool,
-                                help='Whether the order is shipped or not, type anything for a value of True')
-  updateOrderParse.add_argument('-p', '--products', default=[], nargs='+', help='The products being ordered and their '
-                                                                                  'amounts (id,name,amount) - only id or'
-                                                                                  ' name required, but both commas are'
-                                                                                  ' required')
+  updateOrderParse.add_argument('orders', nargs='+', help='The orders being updated (id,destination,date,is_paid,'
+                                                           'is_shipped,product1,product2,...,productN); only id '
+                                                           'and products is required. Products should be (id;name;amount) '
+                                                           'and date should be of the form (MM/DD/YYYY).\nEx. (id,,2/2/1978'
+                                                           ',,t,id_1;prod1;1,id_2;prod2;2)\nNote that for is_paid and is_shipped'
+                                                           ' a non-empty string results in True and False otherwise.')
 
 def string_to_date(string):
   date = string.split('/')
@@ -593,5 +576,6 @@ def get_orders_to_update(orders):
 
 
 
-
+# ----------====================---------- <-<>-<>-<>-<>-<>-+-<>-<>-<>-<>-<>-> ----------====================----------
 # ----------====================---------- ----------===============---------- ----------====================----------
+# ----------====================---------- <-<>-<>-<>-<>-<>-+-<>-<>-<>-<>-<>-> ----------====================----------

@@ -68,26 +68,33 @@ def main():
             elif args.command == 'get-products-by-name':
                 products = stub.GetProductsByName(inventory_system.Names(names=args.names))
                 if len(products.products) > 0:
-                    for product in products.products:
-                        print(product)
+                    for product in products.products: print(product)
                 else:
                     print('There are no products of the given names.')
             elif args.command == 'get-products-by-manufacturer':
                 products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer=args.manufacturer))
-                for product in products.products: print(product)
-            elif args.command == 'get-order':
-                order = stub.GetOrder(inventory_system.ID(id=args.id))
-                print(order)
+                if len(products.products) > 0:
+                    for product in products.products: print(product)
+                else:
+                    print('There are no products with the given manufacturer.')
+            elif args.command == 'get-orders-by-id':
+                orders = stub.GetOrdersByID(inventory_system.IDs(ids=args.ids))
+                if len(orders.orders) > 0:
+                    for order in orders.orders: print(order)
+                else:
+                    print('There are no orders with the given IDs.')
             elif args.command == 'get-orders-by-status':
                 orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=args.paid, shipped=args.shipped))
-                for order in orders.orders: print(order)
+                if len(order.orders) > 0:
+                    for order in orders.orders: print(order)
+                else:
+                    print('There are no orders with the given status.')
             elif args.command == 'add-products':
                 products = to_inventory_system_products(get_products_to_add(args.products))
                 ids = stub.AddProducts(inventory_system.Products(products=products))
                 if len(ids.ids) > 0:
                     print('Product IDs:')
-                    for id in ids.ids:
-                        print(id)
+                    for id in ids.ids: print(id)
                 else:
                     print('Product creation was not successful. It may already exist. Try the get-product-by-* commands.')
             elif args.command == 'update-products':

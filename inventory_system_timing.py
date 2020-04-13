@@ -88,14 +88,13 @@ def main():
         print('Finished timing GetProductsByManufacturer...')
 
 
-        # Timing for GetOrder
+        # Timing for GetOrdersByID
         start_time = time.monotonic() # The start of the timing
 
-        for id in order_ids:
-            order = stub.GetOrder(inventory_system.ID(id=id))
+        order = stub.GetOrdersByID(inventory_system.IDs(ids=order_ids))
 
         grpc_times.append(time.monotonic() - start_time)
-        print('Finished timing GetOrder...')
+        print('Finished timing GetOrdersByID...')
         
 
         # Timing for GetOrdersByStatus
@@ -178,7 +177,7 @@ def main():
         print('GetProductsByID Time:', grpc_times[0])
         print('GetProductsByName Time:', grpc_times[1])
         print('GetProductsByManufacturer Time:', grpc_times[2])
-        print('GetOrder Time:', grpc_times[3])
+        print('GetOrdersByID Time:', grpc_times[3])
         print('GetOrdersByStatus Time:', grpc_times[4])
         print('GetProductsInStock Time:', grpc_times[5])
         print('UpdateProducts Time:', grpc_times[6])
