@@ -144,9 +144,8 @@ def main():
   parser.add_argument('-db', '--database_path', default='inventory_system.db', help='The file that the database is stored in.')
   args = parser.parse_args()
 
-  # Must be one worker since the database can only be accessed within one thread
+  # Must be one worker since the database must be accessed within one thread
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-
   inv_system = InventorySystem(args.database_path)
   inventory_system_grpc.add_InventorySystemServicer_to_server(inv_system, server)
   server.add_insecure_port('[::]:' + args.port)

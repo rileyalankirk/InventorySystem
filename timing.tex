@@ -1,0 +1,71 @@
+\documentclass[12pt]{article}
+
+%packages
+\usepackage{amsthm, amssymb, amsmath, enumerate, geometry, indentfirst, fancyvrb, hyperref}
+\usepackage{siunitx, scrextend, enumitem}
+\usepackage{graphicx, subcaption, float}
+
+
+\geometry{textwidth=6.25in, textheight=9in}
+%\setlength{\parindent}{0em} % remove paragraph indents
+
+
+%these are short cuts
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\nice}{\displaystyle}
+\newcommand{\la}{\lambda}
+\newcommand{\ol}[1]{\overline{#1}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollary}
+\pagestyle{empty}
+
+%start of document
+\begin{document}
+
+
+ \title{CSCI 320: Networking and Distributed Computing \\ Project 02 Timing}
+ \author{Riley Kirkpatrick}
+ \date{April 12th, 2020}
+ 
+ \maketitle
+
+After 9 runs of gRPC timing, I selected the run with the median total time to run.
+The following times are from that run and are divided into how long each function took to time (all times in seconds).
+\begin{itemize}
+\item[] GetProductsByID: 0.15118874400000015
+\item[] GetProductsByName: 0.1221241700000002
+\item[] GetProductsByManufacturer: 0.11720750000000013
+\item[] GetOrdersByID: 0.07756279999999993
+\item[] GetOrdersByStatus: 0.15648306599999984
+\item[] GetProductsInStock: 0.10037608600000025
+\item[] UpdateProducts: 0.38135878300000003
+\item[] UpdateOrders: 0.20439743599999982
+\item[] AddProducts: 0.13557887199999996
+\item[] CreateOrders: 0.21843332399999937
+\end{itemize}
+
+\vspace{-1em}
+\line(1,0){300}
+\vspace{-1em}
+
+\begin{itemize}
+\item[] Total: 1.6647107809999997
+\end{itemize}
+
+
+\noindent All functions interacting with products use 500 products, whether that means the function retrieves, adds, or updates them.
+Similarly, all functions interacting with orders use 50 orders, whether that means the function retrieves, adds, or updates them.
+
+
+The choice of 500 products comes from the fact that gRPC has a 4 MB message size limit and using 750 or 1000 (or more) products exceeds this byte limit.
+In the future I could modify my program to use bidirectional streaming to overcome this limitation, with the caveat of increased complexity.
+Another way to handle large amounts of products and orders is to call the gRPC functions multiple times and only pass up to 500 products/orders at a time.
+
+
+TODO: Time by calling gRPC functions multiple times so that total time is around 15+ seconds.
+
+
+\end{document}

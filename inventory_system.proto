@@ -43,7 +43,7 @@ service InventorySystem {
     /* Retrieves all orders that are unshipped, unpaid, or both  */
     rpc GetOrdersByStatus (OrderStatus) returns (Orders) {}
 
-    // Future TODO: create new GetOrders that returns all orders
+    // Future TODO: create GetOrders that returns all orders
     // rpc GetOrders (Empty) returns (Orders) {}
 
     /* Clears inventory system database */
