@@ -467,13 +467,13 @@ def string_to_date(string):
     return None
   return OrderDate(month=date[0], day=date[1], year=date[2])
 
-def products_from_arg_list(arg_list):
+def products_from_arg_list(arg_list, spl=','):
   products = []
   _product = '' # Used if an exception occurs (so that the user knows the first product that failed)
   try:
     for product in arg_list:
       _product = product
-      product = [_ for _ in map(str.strip, product.split(','))]
+      product = [_ for _ in map(str.strip, product.split(spl))]
       # If there were not two commas, then raise an exception
       if len(product) != 3:
           raise Exception
@@ -555,7 +555,7 @@ def get_order_from_list(order):
         if len(order) > 3:
           _order['is_shipped'] = len(order[3]) > 0
           if len(order) > 4:
-            products = products_from_arg_list(order[4:])
+            products = products_from_arg_list(order[4:], spl=';')
             if products is None:
               return
             _order['products'] = products
