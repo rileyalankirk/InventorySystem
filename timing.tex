@@ -32,27 +32,27 @@
  
  \maketitle
 
-After 9 runs of gRPC timing, I selected the run with the median total time to run.
+After 9 runs of gRPC timing, I selected the run with the median total time.
 The following times are from that run and are divided into how long each function took to time (all times in seconds).
 \begin{itemize}
-\item[] GetProductsByID: 0.15118874400000015
-\item[] GetProductsByName: 0.1221241700000002
-\item[] GetProductsByManufacturer: 0.11720750000000013
-\item[] GetOrdersByID: 0.07756279999999993
-\item[] GetOrdersByStatus: 0.15648306599999984
-\item[] GetProductsInStock: 0.10037608600000025
-\item[] UpdateProducts: 0.38135878300000003
-\item[] UpdateOrders: 0.20439743599999982
-\item[] AddProducts: 0.13557887199999996
-\item[] CreateOrders: 0.21843332399999937
+\item[] GetProductsByID: 0.1805684150000002
+\item[] GetProductsByName: 0.15384835100000016
+\item[] GetProductsByManufacturer: 0.12924276300000015
+\item[] GetOrdersByID: 0.07656160900000009
+\item[] GetOrdersByStatus: 0.15875302599999985
+\item[] GetProductsInStock: 0.11105593099999966
+\item[] UpdateProducts: 0.4868030550000002
+\item[] UpdateOrders: 0.3059147299999996
+\item[] AddProducts: 0.1334436910000001
+\item[] CreateOrders: 0.3591622100000009
 \end{itemize}
 
 \vspace{-1em}
 \line(1,0){300}
-\vspace{-1em}
+\vspace{-0.6em}
 
 \begin{itemize}
-\item[] Total: 1.6647107809999997
+\item[] Total: 2.095353781000001
 \end{itemize}
 
 
@@ -65,7 +65,33 @@ In the future I could modify my program to use bidirectional streaming to overco
 Another way to handle large amounts of products and orders is to call the gRPC functions multiple times and only pass up to 500 products/orders at a time.
 
 
-TODO: Time by calling gRPC functions multiple times so that total time is around 15+ seconds.
+I modified my gRPC timing to run the timing back to back 10 times and then sum the times.
+Similar to running the timing once, after 9 runs of gRPC timing, I selected the run with the median total time to run and display the following times in seconds.
+\begin{itemize}
+    \item[] GetProductsByID: 1.8775839970000003
+    \item[] GetProductsByName: 1.5515576980000172
+    \item[] GetProductsByManufacturer: 1.2014333719999954
+    \item[] GetOrdersByID: 0.6999692510000135
+    \item[] GetOrdersByStatus: 1.7190775080000011
+    \item[] GetProductsInStock: 1.238777718999994
+    \item[] UpdateProducts: 4.405793927999987
+    \item[] UpdateOrders: 2.0425504680000035
+    \item[] AddProducts: 1.4805720659999917
+    \item[] CreateOrders: 2.3826795900000075
+    \end{itemize}
+    
+    \vspace{-1.2em}
+    \line(1,0){300}
+    \vspace{-1em}
+    
+    \begin{itemize}
+    \item[] Total: 18.59999559700001
+    \end{itemize}
+
+
+According to groups that completed both gRPC and XML-RPC, gRPC seems to run in about half the time XML-RPC does.
+This makes sense since gRPC uses HTTP/2 whereas XML-RPC uses HTTP.
+So one would expect a gRPC server running the same function calls to complete them faster since it has less overhead.
 
 
 \end{document}

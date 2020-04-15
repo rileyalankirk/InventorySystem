@@ -1,11 +1,11 @@
-// Compile proto file into Python
-// python3 -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. inventory_system.proto
+/* Author: Riley Kirkpatrick */
+
 
 syntax = "proto3";
+package InventorySystem;
 
 
 /* A service that allows you to keep track of an inventory of products and the orders for those products */
-// Note: Future TODOs are the planned updates for the inventory system to make it more general and more feature-rich
 service InventorySystem {
     /* Gets products by their IDs */
     rpc GetProductsByID (IDs) returns (Products) {}
@@ -27,14 +27,14 @@ service InventorySystem {
     /* Retrieves all products that are in stock  */
     rpc GetProductsInStock (Empty) returns (Products) {}
 
-    // Future TODO: Create function to get all products no matter the stock
+    // Future work: Create function to get all products no matter the stock
     // rpc GetProducts (Empty) returns (Products) {}
 
     /* Gets orders by their ID */
     rpc GetOrdersByID (IDs) returns (Orders) {}
 
-    /* Creates an order if there is enough product in stock with an ID assigned by the server;
-       returns a string if there is an exception otherwise empty string */
+    /* Creates orders if there is enough product in stock with IDs assigned by the server;
+    returns the IDs of the orders if they were added successfully otherwise empty list */
     rpc CreateOrders (Orders) returns (IDs) {}
 
     /* Update orders (ID cannot be updated) and if there is not enough product the order is not updated */
@@ -43,7 +43,7 @@ service InventorySystem {
     /* Retrieves all orders that are unshipped, unpaid, or both  */
     rpc GetOrdersByStatus (OrderStatus) returns (Orders) {}
 
-    // Future TODO: create GetOrders that returns all orders
+    // Future work: create GetOrders that returns all orders
     // rpc GetOrders (Empty) returns (Orders) {}
 
     /* Clears inventory system database */

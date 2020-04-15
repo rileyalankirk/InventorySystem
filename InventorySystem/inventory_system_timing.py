@@ -15,7 +15,7 @@ import time
 from inventory_system import get_dbsession, reset_db
 from os import path
 
-NUMBER_OF_TIMING_RUNS = 10
+NUMBER_OF_TIMING_RUNS = 1
 UNIQUE_PRODUCTS_PER_ORDER = 10
 NUMBER_OF_PRODUCTS = 500 # Should be multiple of UNIQUE_PRODUCTS_PER_ORDER for simplicity
 NUMBER_OF_ORDERS = NUMBER_OF_PRODUCTS // UNIQUE_PRODUCTS_PER_ORDER

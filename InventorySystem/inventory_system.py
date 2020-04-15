@@ -40,33 +40,36 @@ class Order(InventoryBase):
 
 
 def create_inventory_system_db(database_path):
+  """Creates an inventory system database in the file at database_path
+  """
   # Create an engine that stores data in the database path
   engine = create_engine('sqlite:///' + database_path)
   # Create all tables in the engine
   InventoryBase.metadata.create_all(engine)
 
 def get_dbsession(database_path):
-  # Create a DBSession instance
+  """ Create a DBSession instance
+  """
   engine = create_engine('sqlite:///' + database_path)
   InventoryBase.metadata.bind = engine
   DBSession = sessionmaker(bind=engine)
   return DBSession()
 
 def query_db(database, query, filter=None):
-  """Query a database with or without a filter and return all values of the query.
+  """Query a database with or without a filter and return all values of the query
   """
   if filter is None:
     return database.query(query).all()
   return database.query(query).filter(filter).all()
 
 def add_db(database, values):
-  """Add values to the database and flush them.
+  """Add values to the database and flush the database
   """
   database.add_all(values)
   database.flush()
 
 def update_db(database, query, values, filter=None):
-  """Update rows in the database based on a query and possibly a filter.
+  """Update rows in the database based on a query and possibly a filter
   """
   if filter is None:
     database.query(query).update(values, synchronize_session=False)
@@ -76,26 +79,26 @@ def update_db(database, query, values, filter=None):
 
 def update_product_db(database, products):
   """Update product rows given a dict of tuple (id,name) for each product as keys to the new values,
-  i.e., {(id,name):values,...}.
+  i.e., {(id,name):values,...}
   """
   for product in products:
     database.query(Product).filter(Product.id == product[0] or Product.name == product[1]).\
                                                 update(products[product], synchronize_session=False)
 
 def update_order_db(database, orders):
-  """Update order rows given a dict of IDs mapped to the new values, i.e., {id:values,...}.
+  """Update order rows given a dict of IDs mapped to the new values, i.e., {id:values,...}
   """
   for order in orders:
     database.query(Order).filter(Order.id == order).update(orders[order], synchronize_session=False)
 
 def save_db(database):
-  """Save the database.
+  """Save the database
   """
   # The parameter database must be an instance of DBSession
   database.commit()
 
 def reset_db(database):
-  """Reset the database by removing all products and orders from it.
+  """Reset the database by removing all products and orders from it
   """
   database.query(Product).delete()
   database.query(Order).delete()
@@ -113,7 +116,7 @@ def reset_db(database):
 
 
 class OrderDate():
-  """A class for creating dates for an order that will then be stored in the database as a PickleType.
+  """A class for creating dates for an order that will then be stored in the database as a PickleType
   """
 
   def __init__(self, month, day, year):
@@ -122,7 +125,7 @@ class OrderDate():
     self.year = year
 
 class OrderProduct():
-  """A class for creating products for an order that will then be stored in the database as a PickleType.
+  """A class for creating products for an order that will then be stored in the database as a PickleType
   """
 
   def __init__(self, id, name, amount):
@@ -130,94 +133,22 @@ class OrderProduct():
     self.name = name
     self.amount = amount
 
-
-def get_order_product(database, prod_for_id, prod_for_name=None, prod_for_amount=None, query=False):
-  """Retrieves and returns a product based on the ID, name, and amount from the passed products.
-  The passed products are dbProduct objects and are converted to a OrderProduct object. If a product
-  for name or amount is not supplied, then the product for ID is used to get the name or amount.
-  If query is True, then the product for ID is used to query the database for the product which then
-  is used to create the OrderProduct object.
-  """
-
-  # Query will use prod_for_id to query the database for the ID and name if only one is supplied
-  # The amount from prod_for_id is used for the amount
-  if query:
-    product = query_db(database, Product, (Product.id==prod_for_id.id or Product.name==prod_for_id.name))
-    if len(product) > 0:
-      product = product[0]
-      return OrderProduct(id=product.id, name=product.name, amount=prod_for_id.amount)
-    return None
-  
-  # If no products for name or amount retrieval is supplied, use the product supplied for the ID
-  if prod_for_name is None:
-    prod_for_name = prod_for_id
-  if prod_for_amount is None:
-    prod_for_amount = prod_for_id
-  return OrderProduct(id=prod_for_id.id, name=prod_for_name.name, amount=prod_for_amount.amount)
-
-def get_products_new_order(database, requested_products):
-  """Converts a list of inventory_system.Product objects to type OrderProduct
-  """
-  products = []
-  for product in requested_products:
-    product = get_order_product(database, product, query=True)
-    if not product is None and product.amount > 0:
-      products.append(product)
-  return products
-
-def check_product_available(database, added_products):
-    """Checks all products added to an order to make sure there is enough in stock in the database. Returns True if
-    there is enough stock and False otherwise.
-    """
-    for product in added_products:
-      product_available = query_db(database, Product, (Product.id==product.id or Product.name==product.name))
-      if len(product_available) > 0:
-        if product_available[0].amount < product.amount:
-          return False
-    return True
-
-def remove_products_from_order(database, removed_products):
-    """Adds the products removed from an order back into stock
-    """
-    for product in removed_products:
-      product_in_db = query_db(database, Product, (Product.name==product.name or Product.id==product.id))
-      if len(product_in_db) > 0:
-        update_db(database, Product, {Product.amount:(product_in_db[0].amount + product.amount)},
-                  (Product.name==product.name or Product.id==product.id))
-
-def add_products_to_order(database, added_products):
-    """Removes the products added to an order from stock
-    """
-    for product in added_products:
-      product_in_db = query_db(database, Product, (Product.name==product.name or Product.id==product.id))
-      if len(product_in_db) > 0:
-        update_db(database, Product, {Product.amount:(product_in_db[0].amount - product.amount)},
-                  (Product.name==product.name or Product.id==product.id))
-
-def get_order_products(database, id):
-    """Retrieves all products in an order with the ID of the product as a key to the amount of the product. 
-    """
-    order = query_db(database, Order, Order.id==id)
-    if len(order) > 0:
-      return {product.id: product.amount for product in order[0].products}
-    return {}
-
-def get_products_by_id(database, ids):
+def GetProductsByID(database, ids):
   """Returns a Product object of a given ID or None if the product is not found.
   """
   return query_db(database, Product, (Product.id.in_(ids)))
 
-def get_products_by_name(database, names):
+def GetProductsByName(database, names):
   """Returns a Product object of a given name or None if the product is not found.
   """
   return query_db(database, Product, (Product.name.in_(names)))
 
-def get_products_by_manufacturer(database, manufacturer):
+def GetProductsByManufacturer(database, manufacturer):
   """Returns a Product object of a given name or None if the product is not found.
   """
   return query_db(database, Product, (Product.manufacturer==manufacturer))
 
-def add_products(database, products):
+def AddProducts(database, products):
   """Adds products to the database and returns their IDs or an empty list if the add fails.
   """
   try:
@@ -238,7 +169,7 @@ def add_products(database, products):
     print('There was an issue adding products: ' + e)
     return []
 
-def update_products(database, products):
+def UpdateProducts(database, products):
   """Updates products based on the passed products.
   """
   try:
@@ -271,17 +202,71 @@ def update_products(database, products):
     # Allow the interrupt to propagate up 
     raise KeyboardInterrupt
 
-def get_products_in_stock(database):
+def GetProductsInStock(database):
   """Returns a list of products in stock.
   """
   return query_db(database, Product, Product.amount > 0)
 
-def get_orders_by_id(database, ids):
+def GetOrdersByID(database, ids):
   """Gets orders by their IDs or returns None if not found.
   """
   return query_db(database, Order, (Order.id.in_(ids)))
 
-def create_orders(database, orders):
+def check_product_available(database, added_products):
+    """Checks all products added to an order to make sure there is enough in stock in the database. Returns True if
+    there is enough stock and False otherwise.
+    """
+    for product in added_products:
+      product_available = query_db(database, Product, (Product.id==product.id or Product.name==product.name))
+      if len(product_available) > 0:
+        if product_available[0].amount < product.amount:
+          return False
+    return True
+
+def get_order_product(database, prod_for_id, prod_for_name=None, prod_for_amount=None, query=False):
+  """Retrieves and returns a product based on the ID, name, and amount from the passed products.
+  The passed products are dbProduct objects and are converted to a OrderProduct object. If a product
+  for name or amount is not supplied, then the product for ID is used to get the name or amount.
+  If query is True, then the product for ID is used to query the database for the product which then
+  is used to create the OrderProduct object.
+  """
+
+  # Query will use prod_for_id to query the database for the ID and name if only one is supplied
+  # The amount from prod_for_id is used for the amount
+  if query:
+    product = query_db(database, Product, (Product.id==prod_for_id.id or Product.name==prod_for_id.name))
+    if len(product) > 0:
+      product = product[0]
+      return OrderProduct(id=product.id, name=product.name, amount=prod_for_id.amount)
+    return None
+  
+  # If no products for name or amount retrieval is supplied, use the product supplied for the ID
+  if prod_for_name is None:
+    prod_for_name = prod_for_id
+  if prod_for_amount is None:
+    prod_for_amount = prod_for_id
+  return OrderProduct(id=prod_for_id.id, name=prod_for_name.name, amount=prod_for_amount.amount)
+
+def get_products_new_order(database, requested_products):
+  """Converts a list of Product objects to type OrderProduct
+  """
+  products = []
+  for product in requested_products:
+    product = get_order_product(database, product, query=True)
+    if not product is None and product.amount > 0:
+      products.append(product)
+  return products
+
+def add_products_to_order(database, added_products):
+    """Removes the products added to an order from stock
+    """
+    for product in added_products:
+      product_in_db = query_db(database, Product, (Product.name==product.name or Product.id==product.id))
+      if len(product_in_db) > 0:
+        update_db(database, Product, {Product.amount:(product_in_db[0].amount - product.amount)},
+                  (Product.name==product.name or Product.id==product.id))
+  
+def CreateOrders(database, orders):
   """Adds an order to the database and returns the ID or an empty string if the add fails.
   """
   try:
@@ -311,7 +296,24 @@ def create_orders(database, orders):
     # Allow the interrupt to propagate up 
     raise KeyboardInterrupt
 
-def update_orders(database, orders):
+def remove_products_from_order(database, removed_products):
+    """Adds the products removed from an order back into stock
+    """
+    for product in removed_products:
+      product_in_db = query_db(database, Product, (Product.name==product.name or Product.id==product.id))
+      if len(product_in_db) > 0:
+        update_db(database, Product, {Product.amount:(product_in_db[0].amount + product.amount)},
+                  (Product.name==product.name or Product.id==product.id))
+
+def get_order_products(database, id):
+    """Retrieves all products in an order with the ID of the product as a key to the amount of the product. 
+    """
+    order = query_db(database, Order, Order.id==id)
+    if len(order) > 0:
+      return {product.id: product.amount for product in order[0].products}
+    return {}
+
+def UpdateOrders(database, orders):
   """Updates an order based on the passed order.
   """
   try:
@@ -366,7 +368,7 @@ def update_orders(database, orders):
     # Allow the interrupt to propagate up 
     raise KeyboardInterrupt
 
-def get_orders_by_status(database, order_status):
+def GetOrdersByStatus(database, order_status):
   filter = None
   if order_status.shipped and order_status.paid:
     filter = (Order.is_shipped==True and Order.is_paid==True)
