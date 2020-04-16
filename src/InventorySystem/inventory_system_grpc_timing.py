@@ -6,8 +6,8 @@ Author: Riley Kirkpatrick
 
 import argparse
 import grpc
-import inventory_system_pb2 as inventory_system
-import inventory_system_pb2_grpc as inventory_system_grpc
+import inventory_system_pb2
+import inventory_system_pb2_grpc
 import numpy as np
 import os
 import random
@@ -23,24 +23,24 @@ NUMBER_OF_ORDERS = NUMBER_OF_PRODUCTS // UNIQUE_PRODUCTS_PER_ORDER
 
 def prepare_database_for_timing(stub):
     # Empty the database
-    stub.ClearDatabase(inventory_system.Empty())
+    stub.ClearDatabase(inventory_system_pb2.Empty())
 
     # Add products to the database
-    products = [inventory_system.Product(name='Product' + str(i), description='A product that carries the number ' + str(i),
+    products = [inventory_system_pb2.Product(name='Product' + str(i), description='A product that carries the number ' + str(i),
                         manufacturer='Riley Kirkpatrick', wholesale_cost=i, sale_cost=i/2.5, amount=i)
                         for i in range(NUMBER_OF_PRODUCTS)]
-    product_ids = stub.AddProducts(inventory_system.Products(products=products)).ids
+    product_ids = stub.AddProducts(inventory_system_pb2.Products(products=products)).ids
 
     # Add orders to the database
-    date = inventory_system.Date(year=2020, month=4, day=20)
+    date = inventory_system_pb2.Date(year=2020, month=4, day=20)
     orders = []
     for i in range(NUMBER_OF_ORDERS):
         # Since amount=i//2, Product0 and Product1 should not be added to the first order
-        products = [inventory_system.Product(name='Product' + str(i), amount=i//2) for i in range(i*UNIQUE_PRODUCTS_PER_ORDER, (i+1)*UNIQUE_PRODUCTS_PER_ORDER)]
-        orders.append(inventory_system.Order(destination=str(i) + ' Main St, Bethlehem, PA 18018', date=date,
+        products = [inventory_system_pb2.Product(name='Product' + str(i), amount=i//2) for i in range(i*UNIQUE_PRODUCTS_PER_ORDER, (i+1)*UNIQUE_PRODUCTS_PER_ORDER)]
+        orders.append(inventory_system_pb2.Order(destination=str(i) + ' Main St, Bethlehem, PA 18018', date=date,
                                              products=products, is_paid=i % 2 == 0, is_shipped=i % 2 != 0))
     
-    return product_ids, stub.CreateOrders(inventory_system.Orders(orders=orders)).ids
+    return product_ids, stub.CreateOrders(inventory_system_pb2.Orders(orders=orders)).ids
 
 def run_timing(stub, number_of_run=None):
     # The number of the timing run
@@ -54,7 +54,7 @@ def run_timing(stub, number_of_run=None):
     # Timing for GetProductsByID
     start_time = time.monotonic() # The start of the timing
 
-    products = stub.GetProductsByID(inventory_system.IDs(ids=product_ids)).products
+    products = stub.GetProductsByID(inventory_system_pb2.IDs(ids=product_ids)).products
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing GetProductsByID%s...' % run_number)
@@ -64,7 +64,7 @@ def run_timing(stub, number_of_run=None):
     start_time = time.monotonic() # The start of the timing
 
     names = ['Product' + str(i) for i in range(NUMBER_OF_PRODUCTS)]
-    products = stub.GetProductsByName(inventory_system.Names(names=names)).products
+    products = stub.GetProductsByName(inventory_system_pb2.Names(names=names)).products
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing GetProductsByName%s...' % run_number)
@@ -73,7 +73,7 @@ def run_timing(stub, number_of_run=None):
     # Timing for GetProductsByManufacturer
     start_time = time.monotonic() # The start of the timing
 
-    products = stub.GetProductsByManufacturer(inventory_system.Manufacturer(manufacturer='Riley Kirkpatrick')).products
+    products = stub.GetProductsByManufacturer(inventory_system_pb2.Manufacturer(manufacturer='Riley Kirkpatrick')).products
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing GetProductsByManufacturer%s...' % run_number)
@@ -82,7 +82,7 @@ def run_timing(stub, number_of_run=None):
     # Timing for GetOrdersByID
     start_time = time.monotonic() # The start of the timing
 
-    orders = stub.GetOrdersByID(inventory_system.IDs(ids=order_ids)).orders
+    orders = stub.GetOrdersByID(inventory_system_pb2.IDs(ids=order_ids)).orders
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing GetOrdersByID%s...' % run_number)
@@ -91,10 +91,10 @@ def run_timing(stub, number_of_run=None):
     # Timing for GetOrdersByStatus
     start_time = time.monotonic() # The start of the timing
 
-    orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=False)).orders
-    orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=False, shipped=True)).orders
-    orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=False)).orders
-    orders = stub.GetOrdersByStatus(inventory_system.OrderStatus(paid=True, shipped=True)).orders
+    orders = stub.GetOrdersByStatus(inventory_system_pb2.OrderStatus(paid=False, shipped=False)).orders
+    orders = stub.GetOrdersByStatus(inventory_system_pb2.OrderStatus(paid=False, shipped=True)).orders
+    orders = stub.GetOrdersByStatus(inventory_system_pb2.OrderStatus(paid=True, shipped=False)).orders
+    orders = stub.GetOrdersByStatus(inventory_system_pb2.OrderStatus(paid=True, shipped=True)).orders
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing GetOrdersByStatus%s...' % run_number)
@@ -103,7 +103,7 @@ def run_timing(stub, number_of_run=None):
     # Timing for GetProductsInStock
     start_time = time.monotonic() # The start of the timing
 
-    products = stub.GetProductsInStock(inventory_system.Empty()).products
+    products = stub.GetProductsInStock(inventory_system_pb2.Empty()).products
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing GetProductsInStock%s...' % run_number)
@@ -112,9 +112,9 @@ def run_timing(stub, number_of_run=None):
     # Timing for UpdateProducts
     start_time = time.monotonic() # The start of the timing
     
-    products = [inventory_system.Product(id=id, wholesale_cost=random.random()*10000, sale_cost=random.random()*2500,
+    products = [inventory_system_pb2.Product(id=id, wholesale_cost=random.random()*10000, sale_cost=random.random()*2500,
                                             amount=int(random.random()*100)) for id in product_ids]
-    stub.UpdateProducts(inventory_system.Products(products=products))
+    stub.UpdateProducts(inventory_system_pb2.Products(products=products))
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing UpdateProducts%s...' % run_number)
@@ -124,9 +124,9 @@ def run_timing(stub, number_of_run=None):
     _, order_ids = prepare_database_for_timing(stub)
     start_time = time.monotonic() # The start of the timing
 
-    products = [inventory_system.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS, 2*NUMBER_OF_ORDERS+1)]
-    orders = [inventory_system.Order(id=id, is_paid=random.random() > 0.5, is_shipped=random.random() <= 0.5, products=products) for id in order_ids]
-    stub.UpdateOrders(inventory_system.Orders(orders=orders))
+    products = [inventory_system_pb2.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS, 2*NUMBER_OF_ORDERS+1)]
+    orders = [inventory_system_pb2.Order(id=id, is_paid=random.random() > 0.5, is_shipped=random.random() <= 0.5, products=products) for id in order_ids]
+    stub.UpdateOrders(inventory_system_pb2.Orders(orders=orders))
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing UpdateOrders%s...' % run_number)
@@ -136,10 +136,10 @@ def run_timing(stub, number_of_run=None):
     prepare_database_for_timing(stub)
     start_time = time.monotonic() # The start of the timing
 
-    products = [inventory_system.Product(name=str(i), description='A product of the number ' + str(i),
+    products = [inventory_system_pb2.Product(name=str(i), description='A product of the number ' + str(i),
                             manufacturer='Toys R Us', wholesale_cost=i, sale_cost=i/2.5, amount=100)
                             for i in range(NUMBER_OF_PRODUCTS)]
-    ids = stub.AddProducts(inventory_system.Products(products=products)).ids
+    ids = stub.AddProducts(inventory_system_pb2.Products(products=products)).ids
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing AddProducts%s...' % run_number)
@@ -149,13 +149,13 @@ def run_timing(stub, number_of_run=None):
     prepare_database_for_timing(stub)
     start_time = time.monotonic() # The start of the timing
 
-    date = inventory_system.Date(year=2020, month=4, day=20)
+    date = inventory_system_pb2.Date(year=2020, month=4, day=20)
     orders = []
     for i in range(NUMBER_OF_ORDERS):
-        products = [inventory_system.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS, 2*NUMBER_OF_ORDERS+1)]
-        orders.append(inventory_system.Order(destination="Elmo's World", date=date, products=products,
+        products = [inventory_system_pb2.Product(name='Product' + str(i), amount=1) for i in range(2*NUMBER_OF_ORDERS, 2*NUMBER_OF_ORDERS+1)]
+        orders.append(inventory_system_pb2.Order(destination="Elmo's World", date=date, products=products,
                                                 is_paid=i % 2 == 0, is_shipped=i % 2 != 0))
-    ids = stub.CreateOrders(inventory_system.Orders(orders=orders)).ids
+    ids = stub.CreateOrders(inventory_system_pb2.Orders(orders=orders)).ids
 
     grpc_times.append(time.monotonic() - start_time)
     print('Finished timing CreateOrders%s...\n\n' % run_number)
@@ -170,7 +170,7 @@ def main():
     args = parser.parse_args()
 
     with grpc.insecure_channel(args.ip + ':' + args.port) as channel:
-        stub = inventory_system_grpc.InventorySystemStub(channel)
+        stub = inventory_system_pb2_grpc.InventorySystemStub(channel)
         
         grpc_times = [run_timing(stub, i + 1) for i in range(NUMBER_OF_TIMING_RUNS)]
         sum_of_times = np.sum(grpc_times, axis=0)
