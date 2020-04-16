@@ -1,4 +1,4 @@
-# CSCI-320-Project02
+# InventorySystem
 
 
 **Setup**
