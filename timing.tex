@@ -89,9 +89,12 @@ Similar to running the timing once, after 9 runs of gRPC timing, I selected the 
     \end{itemize}
 
 
-According to groups that completed both gRPC and XML-RPC, gRPC seems to run in about half the time XML-RPC does.
+According to groups that completed both gRPC and XML-RPC, gRPC runs twice as fast as XML-RPC does (or even better).
 This makes sense since gRPC uses HTTP/2 whereas XML-RPC uses HTTP.
 So one would expect a gRPC server running the same function calls to complete them faster since it has less overhead.
+If I were making a commercial application I would definitely use gRPC since it is faster.
+Also, since the functions implemented do not rely on being run on a gRPC server, the majority of the work is writing the functions, not writing the gRPC server.
+Thus I do not think that choosing gRPC vs XML-RPC by which server is easier to implement matters, especially not as much as the speed uplift.
 
 
 \end{document}
