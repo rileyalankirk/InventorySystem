@@ -424,15 +424,14 @@ def add_parsers_and_subparsers(parser):
                                                                   'empty string for false and any other string for true')
 
 
-  # Create a parser for AddProducts and UpdateProducts which each have arguments for a product
+  # Create a parser for AddProducts and UpdateProducts which each have arguments for products
   addProductParse = subparsers.add_parser('add-products', help='add-products help')
   addProductParse.add_argument('products', nargs='+', help='The products being added (name,description,manufacturer,'
                                                            'wholesale_cost,sale_cost,amount); only name is required')
 
-
   updateProductParse = subparsers.add_parser('update-products', help='update-products help')
   # At least one of name and ID should be passed; nothing will happen if neither is passed
-  addProductParse.add_argument('products', nargs='+', help='The products being updated (id,name,description,manufacturer,'
+  updateProductParse.add_argument('products', nargs='+', help='The products being updated (id,name,description,manufacturer,'
                                                            'wholesale_cost,sale_cost,amount); only id or name is required')
 
 
@@ -462,10 +461,6 @@ def string_to_date(string):
       # Remove whitespace from each value and then convert it to an integer
       date = [_ for _ in map(int, map(str.strip, date))]
   except:
-    print('Date was not of the correct form:\n'
-          '\tExpected: (MM/DD/YYYY) such that 1 ≤ MM ≤ 12, 1 ≤ DD ≤ 31, 0 ≤ YYYY ≤ 9999'
-          ' - requires both / even if a value is left empty',
-          '\n\tRecieved:', string)
     return None
   return OrderDate(month=date[0], day=date[1], year=date[2])
 
@@ -480,11 +475,12 @@ def products_from_arg_list(arg_list, spl=','):
       if len(product) != 3:
           raise Exception
       product[2] = int(product[2])
+      # Check for duplicate products
+      for __product in products:
+        if __product.id == product[0] or __product.name == product[1]:
+          continue
       products.append(OrderProduct(id=product[0], name=product[1], amount=product[2]))
   except:
-    print('At least one product was not of the correct form:\n\tExpected: (id,name,amount)'
-          '- only id or name required, but both commas are required',
-          '\n\tRecieved:', _product)
     return None
   return products
 
@@ -497,20 +493,28 @@ def get_date_and_products(date, products):
     return (None,)
   return date, products
 
+def is_int_or_float(string):
+  # Checks if a string is a float or int
+  values = string.split('.')
+  for value in values:
+    if not value.isdecimal():
+      return False
+  return True
+
 def get_product_from_list(product, id=False):
-  if len(product) > 0 and (product[0] != '' or id):
+  if len(product) >= 1 and (product[0] != '' or id):
     _product = {'name':product[0], 'description':'', 'manufacturer':'', 'wholesale_cost':0.0, 'sale_cost':0.0, 'amount':0}
     if len(product) >= 2:
       _product['description'] = product[1]
       if len(product) >= 3:
         _product['manufacturer'] = product[2]
         if len(product) >= 4:
-          if product[3].isdecimal():
+          if is_int_or_float(product[3]):
             _product['wholesale_cost'] = float(product[3])
           if len(product) >= 5:
-            if product[4].isdecimal():
+            if is_int_or_float(product[4]):
               _product['sale_cost'] = float(product[4])
-            if len(product) >= 6 and product[5].isdecimal():
+            if len(product) >= 6 and is_int_or_float(product[5]):
               _product['amount'] = int(product[5])
     return _product
 
@@ -520,6 +524,10 @@ def get_products_to_add(products):
     product = [value.strip() for value in product.split(',')]
     _product = get_product_from_list(product)
     if not _product is None:
+      # Check for duplicate products
+      for product in _products:
+        if product.name == _product['name']:
+          continue
       _products.append(Product(name=_product['name'], description=_product['description'],
                                manufacturer=_product['manufacturer'], wholesale_cost=_product['wholesale_cost'],
                                sale_cost=_product['sale_cost'], amount=_product['amount']))
@@ -532,14 +540,12 @@ def get_products_to_update(products):
     _product = None
     if len(product) > 1:
       _product = get_product_from_list(product[1:], id=product[0] != '')
-    if product[0] != '':
-      if _product is None:
-        _product = {'id': product[0]}
-      else:
-        _product['id'] = product[0]
-      
-    if not _product is None:
-      _products.append(Product(id=product['id'], name=_product['name'], description=_product['description'],
+    if product[0] != '' and _product is None:
+      return
+    if _product is None:
+      _product = {'name':'', 'description':'', 'manufacturer':'', 'wholesale_cost':0.0, 'sale_cost':0.0, 'amount':0}
+    else:
+      _products.append(Product(id=product[0], name=_product['name'], description=_product['description'],
                                manufacturer=_product['manufacturer'], wholesale_cost=_product['wholesale_cost'],
                                sale_cost=_product['sale_cost'], amount=_product['amount']))
   return _products
@@ -561,7 +567,7 @@ def get_order_from_list(order):
             if products is None:
               return
             _order['products'] = products
-  if len(_order[products]) > 0:
+  if len(_order['products']) > 0:
     return _order
 
 def get_orders_to_create(orders):
